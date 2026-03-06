@@ -81,7 +81,7 @@ export default function ScanPage() {
                 }`} />
               </div>
               <span className={`font-mono text-sm lowercase transition-colors duration-500 ${
-                isActive ? 'text-indigo animate-gentle-pulse' : 'text-text-muted'
+                isActive ? 'text-indigo animate-gentle-pulse' : 'text-text-secondary'
               }`}>
                 {s.text}
               </span>

@@ -23,7 +23,7 @@ export default function HomePage() {
         <ProfileBadge />
       </div>
 
-      {/* Greeting card — flat, no gradient */}
+      {/* Greeting card */}
       <div className="bg-warm-white rounded-3xl p-6 mb-8 shadow-soft border border-border">
         <p className="font-mono text-sm lowercase text-indigo mb-1">
           what are you eating?
@@ -32,7 +32,7 @@ export default function HomePage() {
           Search any dish to check if it's safe for your diet
         </p>
         <div className="mt-1">
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-text-secondary">
             We'll scan common recipes and flag restricted ingredients
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function HomePage() {
       <RecentSearches />
 
       {/* Disclaimer */}
-      <p className="mt-10 text-[11px] text-text-muted text-center leading-relaxed px-4">
+      <p className="mt-10 text-[11px] text-text-secondary text-center leading-relaxed px-4">
         nibble uses AI to identify common ingredients. Results may vary by restaurant.
         Not medical advice — when in doubt, ask the kitchen.
       </p>
@@ -65,7 +65,7 @@ function QuickChip({ dish }) {
   return (
     <button
       onClick={() => navigate('/scan', { state: { dish } })}
-      className="bg-warm-white border border-border rounded-full px-3.5 py-1.5 text-xs font-mono lowercase text-text-secondary hover:bg-indigo hover:text-white hover:border-indigo transition-all shadow-soft"
+      className="bg-warm-white border border-border rounded-full px-4 py-2 min-h-[44px] text-xs font-mono lowercase text-text-primary hover:bg-indigo hover:text-white hover:border-indigo transition-all shadow-soft"
     >
       {dish.toLowerCase()}
     </button>

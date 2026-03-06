@@ -16,7 +16,7 @@ export default function RecentSearches() {
 
   return (
     <div className="mt-8">
-      <h3 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
+      <h3 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
         recently searched
       </h3>
       <div className="space-y-2">
@@ -26,17 +26,17 @@ export default function RecentSearches() {
             <button
               key={result.dish}
               onClick={() => navigate('/results', { state: { result } })}
-              className="w-full flex items-center gap-3 bg-warm-white rounded-2xl px-4 py-3.5 shadow-soft border border-border hover:border-indigo transition-all text-left"
+              className="w-full flex items-center gap-3 bg-warm-white rounded-2xl px-4 py-3.5 min-h-[48px] shadow-soft border border-border hover:border-indigo transition-all text-left"
             >
-              <Clock className="w-4 h-4 text-indigo-muted flex-shrink-0" />
+              <Clock className="w-4 h-4 text-indigo flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text-primary truncate">{result.dish}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <div className={`w-2 h-2 rounded-full ${style.dot}`} />
-                  <span className="text-xs font-mono lowercase text-text-muted">{style.label}</span>
+                  <span className="text-xs font-mono lowercase text-text-secondary">{style.label}</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 text-text-secondary flex-shrink-0" />
             </button>
           )
         })}

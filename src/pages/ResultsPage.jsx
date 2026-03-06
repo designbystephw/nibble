@@ -49,30 +49,28 @@ export default function ResultsPage() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-text-secondary hover:text-indigo transition-colors"
+          className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-mono lowercase">back</span>
         </button>
         <button
           onClick={() => toggleFavourite(result.dish)}
-          className="p-2 rounded-full hover:bg-cream-dark transition-colors"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-dark transition-colors"
         >
           <Heart
-            className={`w-5 h-5 transition-colors ${fav ? 'fill-danger text-danger' : 'text-text-muted'}`}
+            className={`w-5 h-5 transition-colors ${fav ? 'fill-danger text-danger' : 'text-text-secondary'}`}
           />
         </button>
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* DISH NAME + ILLUSTRATION                    */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* DISH NAME + ILLUSTRATION */}
       <div className="flex items-center gap-4 mb-8">
         <div className="flex-1">
           <h1 className="font-mono text-2xl lowercase text-text-primary leading-tight">
             {result.dish.toLowerCase()}
           </h1>
-          <p className="text-xs text-text-muted mt-1 font-mono lowercase">
+          <p className="text-xs text-text-secondary mt-1 font-mono lowercase">
             {result.recipesScanned} recipes scanned
           </p>
         </div>
@@ -82,11 +80,9 @@ export default function ResultsPage() {
         />
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* TO EAT OR NOT TO EAT                       */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* TO EAT OR NOT TO EAT */}
       <div className="mb-8">
-        <h2 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
+        <h2 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
           to eat or not to eat
         </h2>
         <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
@@ -98,13 +94,13 @@ export default function ResultsPage() {
           </p>
 
           {/* Witty commentary */}
-          <p className="text-sm text-text-secondary leading-relaxed mb-4">
+          <p className="text-sm text-text-primary leading-relaxed mb-4">
             {result.wittyComment || "Your mum would probably say no, but moderation is key."}
           </p>
 
           {/* Spectrum bar */}
           <div className="relative mt-2">
-            <div className="flex justify-between text-[10px] font-mono lowercase text-text-muted mb-1.5">
+            <div className="flex justify-between text-[10px] font-mono lowercase text-text-secondary mb-1.5">
               <span>eat it</span>
               <span>skip it</span>
             </div>
@@ -123,38 +119,36 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* COMMON INGREDIENTS (collapsible)            */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* COMMON INGREDIENTS (collapsible, in white card) */}
       <div className="mb-8">
-        <button
-          onClick={() => setShowIngredients(!showIngredients)}
-          className="flex items-center justify-between w-full text-left px-1 mb-3"
-        >
-          <h2 className="font-mono text-xs lowercase text-text-muted">
-            common ingredients ({totalCount})
-          </h2>
-          {showIngredients
-            ? <ChevronUp className="w-4 h-4 text-text-muted" />
-            : <ChevronDown className="w-4 h-4 text-text-muted" />
-          }
-        </button>
-        {showIngredients && (
-          <div className="space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
-            {result.ingredients
-              .sort((a, b) => (b.restricted ? 1 : 0) - (a.restricted ? 1 : 0))
-              .map((ingredient, i) => (
-                <IngredientRow key={i} ingredient={ingredient} />
-              ))}
-          </div>
-        )}
+        <div className="bg-warm-white rounded-3xl border border-border shadow-soft overflow-hidden">
+          <button
+            onClick={() => setShowIngredients(!showIngredients)}
+            className="flex items-center justify-between w-full text-left px-5 py-4 min-h-[48px]"
+          >
+            <h2 className="font-mono text-xs lowercase text-indigo">
+              common ingredients ({totalCount})
+            </h2>
+            {showIngredients
+              ? <ChevronUp className="w-4 h-4 text-text-secondary" />
+              : <ChevronDown className="w-4 h-4 text-text-secondary" />
+            }
+          </button>
+          {showIngredients && (
+            <div className="px-4 pb-4 space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
+              {result.ingredients
+                .sort((a, b) => (b.restricted ? 1 : 0) - (a.restricted ? 1 : 0))
+                .map((ingredient, i) => (
+                  <IngredientRow key={i} ingredient={ingredient} />
+                ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* NIBBLE'S THOUGHT PROCESS                   */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* NIBBLE'S THOUGHT PROCESS */}
       <div className="mb-8">
-        <h2 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
+        <h2 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
           nibble's thought process
         </h2>
         <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
@@ -186,7 +180,7 @@ export default function ResultsPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs text-text-muted">Confidence level</p>
+              <p className="text-xs text-text-secondary">Confidence level</p>
               <p className={`font-mono text-sm font-medium ${confidenceColor}`}>
                 {confidenceLabel}
               </p>
@@ -194,55 +188,55 @@ export default function ResultsPage() {
           </div>
 
           {/* Explanation */}
-          <p className="text-sm text-text-secondary leading-relaxed">
+          <p className="text-sm text-text-primary leading-relaxed">
             {result.confidenceExplanation || `Nibble scanned ${result.recipesScanned} recipes and cross-referenced the ingredients against your dietary profile. ${restrictedCount} out of ${totalCount} common ingredients were flagged.`}
           </p>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* REFERENCES (collapsible)                   */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* REFERENCES (collapsible, in white card) */}
       <div className="mb-8">
-        <button
-          onClick={() => setShowSources(!showSources)}
-          className="flex items-center justify-between w-full text-left px-1 mb-3"
-        >
-          <h2 className="font-mono text-xs lowercase text-text-muted">
-            references ({result.sources.length} sources)
-          </h2>
-          {showSources
-            ? <ChevronUp className="w-4 h-4 text-text-muted" />
-            : <ChevronDown className="w-4 h-4 text-text-muted" />
-          }
-        </button>
-        {showSources && (
-          <div className="bg-warm-white rounded-2xl border border-border p-4 space-y-2 shadow-soft animate-fade-up" style={{ animationDuration: '0.3s' }}>
-            {result.sources.map((source, i) => (
-              <a
-                key={i}
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-cream-dark transition-colors group"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-indigo-muted flex-shrink-0" />
-                <span className="text-sm text-indigo group-hover:underline flex-1">
-                  {source.name}
-                </span>
-                <span className="text-[10px] text-text-muted font-mono">
-                  {source.url !== '#' ? new URL(source.url).hostname : ''}
-                </span>
-              </a>
-            ))}
-          </div>
-        )}
+        <div className="bg-warm-white rounded-3xl border border-border shadow-soft overflow-hidden">
+          <button
+            onClick={() => setShowSources(!showSources)}
+            className="flex items-center justify-between w-full text-left px-5 py-4 min-h-[48px]"
+          >
+            <h2 className="font-mono text-xs lowercase text-indigo">
+              references ({result.sources.length} sources)
+            </h2>
+            {showSources
+              ? <ChevronUp className="w-4 h-4 text-text-secondary" />
+              : <ChevronDown className="w-4 h-4 text-text-secondary" />
+            }
+          </button>
+          {showSources && (
+            <div className="px-4 pb-4 space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
+              {result.sources.map((source, i) => (
+                <a
+                  key={i}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[44px] hover:bg-cream-dark transition-colors group"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-indigo flex-shrink-0" />
+                  <span className="text-sm text-indigo group-hover:underline flex-1">
+                    {source.name}
+                  </span>
+                  <span className="text-[10px] text-text-secondary font-mono">
+                    {source.url !== '#' ? new URL(source.url).hostname : ''}
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Disclaimer */}
       <div className="bg-warm-white rounded-2xl p-4 flex gap-3 border border-border shadow-soft mb-6">
-        <Info className="w-4 h-4 text-indigo-muted flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-text-muted leading-relaxed">
+        <Info className="w-4 h-4 text-indigo flex-shrink-0 mt-0.5" />
+        <p className="text-[11px] text-text-secondary leading-relaxed">
           Results are based on common recipes and may vary by restaurant.
           This is not medical advice — when in doubt, ask the kitchen.
         </p>
@@ -251,7 +245,7 @@ export default function ResultsPage() {
       {/* Search again */}
       <button
         onClick={() => navigate('/')}
-        className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 shadow-soft hover:opacity-90 transition-opacity"
+        className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity"
       >
         search another dish
       </button>
@@ -266,13 +260,13 @@ function IngredientRow({ ingredient }) {
     <div className={`rounded-2xl px-4 py-3 border shadow-soft ${
       restricted
         ? 'bg-blush-light/50 border-blush'
-        : 'bg-warm-white border-border'
+        : 'bg-cream border-border'
     }`}>
       <div className="flex items-center gap-3">
         <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
           restricted ? 'bg-danger' : 'bg-safe'
         }`} />
-        <span className={`text-sm flex-1 ${restricted ? 'font-medium text-danger' : 'text-text-secondary'}`}>
+        <span className={`text-sm flex-1 ${restricted ? 'font-medium text-danger' : 'text-text-primary'}`}>
           {name}
         </span>
         {restricted && (
@@ -282,7 +276,7 @@ function IngredientRow({ ingredient }) {
         )}
       </div>
       {restricted && reason && (
-        <p className="text-xs text-text-muted mt-1.5 ml-[22px]">
+        <p className="text-xs text-text-secondary mt-1.5 ml-[22px]">
           {reason}
         </p>
       )}

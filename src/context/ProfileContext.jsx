@@ -17,6 +17,7 @@ export function ProfileProvider({ children }) {
   const [activeProfileId, setActiveProfileId] = useState('default');
   const [searchHistory, setSearchHistory] = useState([]);
   const [favourites, setFavourites] = useState([]);
+  const [customDiets, setCustomDiets] = useState([]);
 
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
 
@@ -47,6 +48,18 @@ export function ProfileProvider({ children }) {
     return favourites.includes(dishName);
   }, [favourites]);
 
+  const addCustomDiet = useCallback((diet) => {
+    setCustomDiets(prev => [...prev, diet]);
+  }, []);
+
+  const updateCustomDiet = useCallback((id, updates) => {
+    setCustomDiets(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
+  }, []);
+
+  const removeCustomDiet = useCallback((id) => {
+    setCustomDiets(prev => prev.filter(d => d.id !== id));
+  }, []);
+
   return (
     <ProfileContext.Provider value={{
       profiles,
@@ -58,6 +71,10 @@ export function ProfileProvider({ children }) {
       favourites,
       toggleFavourite,
       isFavourite,
+      customDiets,
+      addCustomDiet,
+      updateCustomDiet,
+      removeCustomDiet,
     }}>
       {children}
     </ProfileContext.Provider>

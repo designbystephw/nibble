@@ -34,10 +34,10 @@
   --color-caution: #C4A03A;
   --color-danger: #B85454;
 
-  /* Neutrals */
+  /* Neutrals — WCAG AA compliant on cream/warm-white */
   --color-text-primary: #2A2A2A;
-  --color-text-secondary: #6B6767;
-  --color-text-muted: #9E9A96;
+  --color-text-secondary: #4A4845;
+  --color-text-muted: #5C5856;
   --color-border: #D5D2CE;
 
   /* Fonts */
