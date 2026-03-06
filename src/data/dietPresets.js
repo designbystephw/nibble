@@ -149,6 +149,65 @@ export const dietPresets = [
   },
 ];
 
+// Master ingredient list — all known ingredients for autocomplete & typo prevention
+export const knownIngredients = [
+  // From presets (deduplicated)
+  ...new Set(dietPresets.flatMap(p => p.avoidList)),
+  // Common allergens & extras
+  'eggs', 'fish', 'sesame', 'mustard', 'lupin', 'molluscs', 'sulphites',
+  'tree nuts', 'almonds', 'walnuts', 'pecans', 'hazelnuts', 'macadamia nuts',
+  'brazil nuts', 'pine nuts',
+  // Proteins
+  'chicken', 'pork', 'duck', 'turkey', 'venison', 'goat',
+  'salmon', 'tuna', 'cod', 'anchovies', 'sardines', 'mackerel',
+  'squid', 'mussels', 'scallops',
+  // Dairy & alternatives
+  'ghee', 'condensed milk', 'evaporated milk', 'whey', 'casein',
+  'goat milk', 'oat milk', 'almond milk', 'soy milk', 'coconut cream',
+  // Grains & starches
+  'oats', 'corn', 'cornstarch', 'rice', 'brown rice', 'quinoa',
+  'buckwheat', 'millet', 'sorghum', 'tapioca', 'potato starch',
+  'noodles', 'rice noodles', 'glass noodles', 'udon',
+  // Vegetables
+  'broccoli', 'cabbage', 'kale', 'spinach', 'bok choy',
+  'capsicum', 'bell pepper', 'eggplant', 'zucchini', 'carrot',
+  'sweet potato', 'potato', 'corn', 'peas', 'green peas',
+  'bean sprouts', 'bamboo shoots', 'water chestnuts',
+  'beetroot', 'turnip', 'parsnip', 'fennel',
+  // Fruits
+  'avocado', 'coconut', 'dragon fruit', 'papaya', 'passion fruit',
+  'guava', 'starfruit', 'rambutan', 'pomegranate',
+  'grapes', 'blueberries', 'raspberries', 'blackberries',
+  'cranberries', 'figs', 'plum', 'apricot', 'peach', 'nectarine',
+  // Condiments & sauces
+  'mayonnaise', 'mustard', 'wasabi', 'miso',
+  'hoisin sauce', 'teriyaki sauce', 'sriracha', 'sambal',
+  'curry paste', 'coconut aminos', 'tamari',
+  'barbecue sauce', 'ranch dressing', 'salad dressing',
+  // Oils & fats
+  'olive oil', 'sesame oil', 'coconut oil', 'palm oil',
+  'canola oil', 'peanut oil', 'lard', 'shortening',
+  // Sweeteners & baking
+  'stevia', 'monk fruit', 'erythritol', 'sucralose',
+  'brown sugar', 'caster sugar', 'icing sugar', 'molasses',
+  'vanilla', 'baking powder', 'baking soda', 'yeast',
+  // Herbs & spices
+  'cinnamon', 'turmeric', 'cumin', 'coriander', 'paprika',
+  'nutmeg', 'clove', 'star anise', 'cardamom', 'saffron',
+  'oregano', 'basil', 'thyme', 'rosemary', 'bay leaf',
+  'lemongrass', 'galangal', 'kaffir lime leaves', 'pandan',
+  'five spice', 'curry powder', 'garam masala',
+  'white pepper', 'szechuan pepper',
+  'fresh ginger', 'ginger',
+  // Drinks
+  'tea', 'black tea', 'green tea', 'matcha',
+  'energy drinks', 'sports drinks', 'kombucha',
+  // Processed & misc
+  'MSG', 'sodium', 'nitrates', 'nitrites',
+  'gelatin', 'agar', 'carrageenan',
+  'lecithin', 'food starch', 'maltodextrin', 'dextrose',
+].map(i => i.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).sort()
+
 export const popularDishes = [
   'Char Kway Teow',
   'Beef Rendang',

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { dietPresets } from '../data/dietPresets'
+import { dietPresets, knownIngredients } from '../data/dietPresets'
 import { ArrowLeft, X, Plus, ChevronRight, Pencil, Check, Sparkles } from 'lucide-react'
 
 // Find similar presets based on avoid-list overlap
@@ -27,6 +27,9 @@ export default function ProfilePage() {
     customDiets, addCustomDiet, updateCustomDiet, removeCustomDiet,
   } = useProfile()
   const [customInput, setCustomInput] = useState('')
+  const [showIngredientSuggestions, setShowIngredientSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+  const ingredientWrapperRef = useRef(null)
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [newDietName, setNewDietName] = useState('')
   const [editingName, setEditingName] = useState(null) // id of diet being renamed
@@ -54,22 +57,65 @@ export default function ProfilePage() {
     })
   }
 
-  function addIngredient() {
-    const item = customInput.trim().toLowerCase()
-    if (item && !activeProfile.avoidList.includes(item)) {
-      updateProfile(activeProfile.id, {
-        avoidList: [...activeProfile.avoidList, item],
-      })
-      setCustomInput('')
+  // Filter known ingredients based on input, excluding already-added ones
+  const ingredientSuggestions = customInput.trim().length > 0
+    ? knownIngredients
+        .filter(i =>
+          i.includes(customInput.trim().toLowerCase()) &&
+          !activeProfile.avoidList.map(a => a.toLowerCase()).includes(i)
+        )
+        .slice(0, 6)
+    : []
+
+  function addIngredient(ingredient) {
+    const item = (ingredient || '').trim().toLowerCase()
+    // Only allow known ingredients
+    if (!item || !knownIngredients.includes(item)) return
+    if (activeProfile.avoidList.map(a => a.toLowerCase()).includes(item)) return
+    updateProfile(activeProfile.id, {
+      avoidList: [...activeProfile.avoidList, item],
+    })
+    setCustomInput('')
+    setShowIngredientSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+  }
+
+  function handleIngredientKeyDown(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev =>
+        prev < ingredientSuggestions.length - 1 ? prev + 1 : 0
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev =>
+        prev > 0 ? prev - 1 : ingredientSuggestions.length - 1
+      )
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (selectedSuggestionIndex >= 0 && ingredientSuggestions[selectedSuggestionIndex]) {
+        addIngredient(ingredientSuggestions[selectedSuggestionIndex])
+      } else if (ingredientSuggestions.length === 1) {
+        addIngredient(ingredientSuggestions[0])
+      } else if (ingredientSuggestions.length === 0 && customInput.trim()) {
+        // Exact match check for direct typing
+        addIngredient(customInput)
+      }
+    } else if (e.key === 'Escape') {
+      setShowIngredientSuggestions(false)
     }
   }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      addIngredient()
+  // Close suggestions on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ingredientWrapperRef.current && !ingredientWrapperRef.current.contains(e.target)) {
+        setShowIngredientSuggestions(false)
+      }
     }
-  }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   function handleCreateCustomDiet() {
     const name = newDietName.trim()
@@ -367,26 +413,60 @@ export default function ProfilePage() {
           your avoid list
         </h3>
 
-        {/* Add custom ingredient */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex-1 flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-2 shadow-soft focus-within:border-indigo transition-all">
-            <Plus className="w-4 h-4 text-indigo flex-shrink-0" />
-            <input
-              type="text"
-              value={customInput}
-              onChange={(e) => setCustomInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="add an ingredient..."
-              className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
-            />
+        {/* Add ingredient with autocomplete */}
+        <div ref={ingredientWrapperRef} className="relative mb-4">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-2 shadow-soft focus-within:border-indigo transition-all">
+              <Plus className="w-4 h-4 text-indigo flex-shrink-0" />
+              <input
+                type="text"
+                value={customInput}
+                onChange={(e) => {
+                  setCustomInput(e.target.value)
+                  setShowIngredientSuggestions(true)
+                  setSelectedSuggestionIndex(-1)
+                }}
+                onFocus={() => setShowIngredientSuggestions(true)}
+                onKeyDown={handleIngredientKeyDown}
+                placeholder="search for an ingredient..."
+                className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
+              />
+            </div>
+            <button
+              onClick={() => {
+                if (ingredientSuggestions.length === 1) addIngredient(ingredientSuggestions[0])
+                else if (selectedSuggestionIndex >= 0) addIngredient(ingredientSuggestions[selectedSuggestionIndex])
+                else addIngredient(customInput)
+              }}
+              disabled={!customInput.trim() || !knownIngredients.includes(customInput.trim().toLowerCase())}
+              className="bg-indigo text-white font-mono text-xs lowercase rounded-2xl px-4 py-3 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-40"
+            >
+              add
+            </button>
           </div>
-          <button
-            onClick={addIngredient}
-            disabled={!customInput.trim()}
-            className="bg-indigo text-white font-mono text-xs lowercase rounded-2xl px-4 py-3 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-40"
-          >
-            add
-          </button>
+
+          {/* Suggestions dropdown */}
+          {showIngredientSuggestions && customInput.trim().length > 0 && (
+            <div className="absolute top-full left-0 right-12 mt-2 bg-warm-white rounded-2xl shadow-soft-lg border border-border overflow-hidden z-10 max-h-[240px] overflow-y-auto">
+              {ingredientSuggestions.length > 0 ? (
+                ingredientSuggestions.map((item, i) => (
+                  <button
+                    key={item}
+                    onClick={() => addIngredient(item)}
+                    className={`w-full text-left px-4 py-3 min-h-[44px] text-sm font-mono lowercase text-text-primary transition-colors border-b border-border last:border-b-0 ${
+                      i === selectedSuggestionIndex ? 'bg-indigo-light' : 'hover:bg-indigo-light'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-sm text-text-secondary font-mono lowercase">
+                  no matching ingredient found
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Ingredient pills */}
