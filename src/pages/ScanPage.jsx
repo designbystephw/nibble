@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { generateMockResult } from '../data/mockScanResults'
-import { Leaf, Search, BookOpen, ShieldCheck } from 'lucide-react'
+import { Search, BookOpen, ShieldCheck } from 'lucide-react'
+import OnigiriIcon from '../components/OnigiriIcon'
 
 const loadingSteps = [
   { icon: Search, text: 'searching the web...', duration: 1200 },
@@ -31,7 +32,6 @@ export default function ScanPage() {
         setCurrentStep(stepIndex)
         setTimeout(advanceStep, loadingSteps[stepIndex].duration)
       } else {
-        // "Scan" complete — generate result and navigate
         const result = generateMockResult(dish)
         addToHistory(result)
         navigate('/results', { state: { result }, replace: true })
@@ -44,18 +44,14 @@ export default function ScanPage() {
 
   if (!dish) return null
 
-  const step = loadingSteps[currentStep]
-  const StepIcon = step.icon
-
   return (
     <div className="pt-20 flex flex-col items-center justify-center min-h-[70vh]">
-      {/* Animated leaf illustration */}
+      {/* Animated onigiri */}
       <div className="relative mb-10">
-        <div className="w-20 h-20 rounded-full bg-sage-light flex items-center justify-center">
-          <Leaf className="w-9 h-9 text-forest animate-leaf-sway" />
+        <div className="w-20 h-20 rounded-full bg-indigo-light flex items-center justify-center">
+          <OnigiriIcon className="w-10 h-10 text-indigo animate-gentle-pulse" />
         </div>
-        {/* Pulse rings */}
-        <div className="absolute inset-0 w-20 h-20 rounded-full bg-sage-light animate-ping opacity-20" />
+        <div className="absolute inset-0 w-20 h-20 rounded-full bg-indigo-light animate-ping opacity-20" />
       </div>
 
       {/* Dish name */}
@@ -78,14 +74,14 @@ export default function ScanPage() {
               }`}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-500 ${
-                isActive ? 'bg-lilac-light' : isDone ? 'bg-sage-light' : 'bg-cream-dark'
+                isActive ? 'bg-indigo-light' : isDone ? 'bg-sage-light' : 'bg-cream-dark'
               }`}>
                 <Icon className={`w-4 h-4 transition-colors duration-500 ${
-                  isActive ? 'text-cobalt' : isDone ? 'text-forest' : 'text-text-muted'
+                  isActive ? 'text-indigo' : isDone ? 'text-forest' : 'text-text-muted'
                 }`} />
               </div>
               <span className={`font-mono text-sm lowercase transition-colors duration-500 ${
-                isActive ? 'text-text-primary animate-gentle-pulse' : 'text-text-muted'
+                isActive ? 'text-indigo animate-gentle-pulse' : 'text-text-muted'
               }`}>
                 {s.text}
               </span>

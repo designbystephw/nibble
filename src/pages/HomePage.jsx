@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import ProfileBadge from '../components/ProfileBadge'
 import RecentSearches from '../components/RecentSearches'
-import { Leaf } from 'lucide-react'
+import OnigiriIcon from '../components/OnigiriIcon'
 
 export default function HomePage() {
   return (
@@ -11,7 +11,7 @@ export default function HomePage() {
       <div className="flex items-start justify-between mb-10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Leaf className="w-5 h-5 text-forest animate-leaf-sway" />
+            <OnigiriIcon className="w-6 h-6 text-indigo" />
             <h1 className="font-mono text-2xl font-medium lowercase text-text-primary">
               nibble
             </h1>
@@ -23,9 +23,9 @@ export default function HomePage() {
         <ProfileBadge />
       </div>
 
-      {/* Greeting card */}
-      <div className="bg-gradient-to-br from-lilac-light to-peach-light rounded-3xl p-6 mb-8 shadow-sm">
-        <p className="font-mono text-sm lowercase text-text-secondary mb-1">
+      {/* Greeting card — flat, no gradient */}
+      <div className="bg-warm-white rounded-3xl p-6 mb-8 shadow-soft border border-border">
+        <p className="font-mono text-sm lowercase text-indigo mb-1">
           what are you eating?
         </p>
         <p className="text-lg font-medium text-text-primary leading-snug">
@@ -65,7 +65,7 @@ function QuickChip({ dish }) {
   return (
     <button
       onClick={() => navigate('/scan', { state: { dish } })}
-      className="bg-warm-white border border-border rounded-full px-3.5 py-1.5 text-xs font-mono lowercase text-text-secondary hover:bg-cream-dark hover:border-lilac transition-all shadow-sm"
+      className="bg-warm-white border border-border rounded-full px-3.5 py-1.5 text-xs font-mono lowercase text-text-secondary hover:bg-indigo hover:text-white hover:border-indigo transition-all shadow-soft"
     >
       {dish.toLowerCase()}
     </button>

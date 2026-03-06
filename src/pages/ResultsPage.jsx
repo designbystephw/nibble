@@ -19,7 +19,7 @@ const summaryConfig = {
     icon: AlertTriangle,
     label: 'check these',
     sublabel: 'Some ingredients may be restricted',
-    bgClass: 'bg-peach-light',
+    bgClass: 'bg-warm-white',
     dotClass: 'bg-caution',
     textClass: 'text-terracotta',
   },
@@ -60,7 +60,7 @@ export default function ResultsPage() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-text-secondary hover:text-text-primary transition-colors"
+          className="flex items-center gap-1.5 text-text-secondary hover:text-indigo transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-mono lowercase">back</span>
@@ -82,7 +82,7 @@ export default function ResultsPage() {
 
       {/* Confidence badge */}
       <div className="flex items-center gap-2 mb-6">
-        <div className={`flex items-center gap-1.5 bg-warm-white rounded-full px-3 py-1 border border-border`}>
+        <div className="flex items-center gap-1.5 bg-warm-white rounded-full px-3 py-1 border border-border">
           <div className={`w-2 h-2 rounded-full ${
             confidenceLabel === 'high' ? 'bg-safe' : confidenceLabel === 'medium' ? 'bg-caution' : 'bg-danger'
           }`} />
@@ -96,9 +96,9 @@ export default function ResultsPage() {
       </div>
 
       {/* Traffic light summary card */}
-      <div className={`${config.bgClass} rounded-3xl p-5 mb-6 shadow-sm`}>
+      <div className={`${config.bgClass} rounded-3xl p-5 mb-6 shadow-soft border border-border`}>
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-full bg-white/60 flex items-center justify-center flex-shrink-0`}>
+          <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center flex-shrink-0">
             <SummaryIcon className={`w-5 h-5 ${config.textClass}`} />
           </div>
           <div>
@@ -122,7 +122,6 @@ export default function ResultsPage() {
           ingredients found
         </h3>
         <div className="space-y-2">
-          {/* Restricted first */}
           {result.ingredients
             .sort((a, b) => (b.restricted ? 1 : 0) - (a.restricted ? 1 : 0))
             .map((ingredient, i) => (
@@ -146,10 +145,10 @@ export default function ResultsPage() {
           }
         </button>
         {showSources && (
-          <div className="bg-warm-white rounded-2xl border border-border p-4 space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
+          <div className="bg-warm-white rounded-2xl border border-border p-4 space-y-2 shadow-soft animate-fade-up" style={{ animationDuration: '0.3s' }}>
             {result.sources.map((source, i) => (
               <div key={i} className="flex items-center gap-2">
-                <ExternalLink className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+                <ExternalLink className="w-3.5 h-3.5 text-indigo-muted flex-shrink-0" />
                 <span className="text-xs text-text-secondary">{source.name}</span>
               </div>
             ))}
@@ -158,8 +157,8 @@ export default function ResultsPage() {
       </div>
 
       {/* Disclaimer */}
-      <div className="bg-cream-dark rounded-2xl p-4 flex gap-3">
-        <Info className="w-4 h-4 text-text-muted flex-shrink-0 mt-0.5" />
+      <div className="bg-warm-white rounded-2xl p-4 flex gap-3 border border-border shadow-soft">
+        <Info className="w-4 h-4 text-indigo-muted flex-shrink-0 mt-0.5" />
         <p className="text-[11px] text-text-muted leading-relaxed">
           Results are based on common recipes and may vary by restaurant.
           This is not medical advice — when in doubt, ask the kitchen.
@@ -169,7 +168,7 @@ export default function ResultsPage() {
       {/* Search again */}
       <button
         onClick={() => navigate('/')}
-        className="w-full mt-6 bg-cobalt text-white font-mono text-sm lowercase rounded-2xl py-3.5 shadow-sm hover:opacity-90 transition-opacity"
+        className="w-full mt-6 bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 shadow-soft hover:opacity-90 transition-opacity"
       >
         search another dish
       </button>
@@ -181,7 +180,7 @@ function IngredientRow({ ingredient }) {
   const { restricted, name, reason } = ingredient
 
   return (
-    <div className={`rounded-2xl px-4 py-3 border ${
+    <div className={`rounded-2xl px-4 py-3 border shadow-soft ${
       restricted
         ? 'bg-blush-light/50 border-blush'
         : 'bg-warm-white border-border'
@@ -194,7 +193,7 @@ function IngredientRow({ ingredient }) {
           {name}
         </span>
         {restricted && (
-          <span className="text-[10px] font-mono lowercase text-danger bg-blush rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-mono lowercase text-indigo bg-indigo-light rounded-full px-2 py-0.5">
             restricted
           </span>
         )}

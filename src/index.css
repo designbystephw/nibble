@@ -3,36 +3,42 @@
 @import "tailwindcss";
 
 @theme {
-  /* Nibble color palette - warm, soft, approachable */
-  --color-cream: #FDF6EE;
-  --color-cream-dark: #F5EBD9;
-  --color-warm-white: #FAF7F2;
+  /* Nibble — One Year inspired palette */
+  /* Backgrounds: offwhite / light grey */
+  --color-cream: #E8E6E3;
+  --color-cream-dark: #DDDBD7;
+  --color-warm-white: #F0EEEB;
 
-  /* Pastels */
-  --color-lilac: #D4C5E2;
-  --color-lilac-light: #EDE6F5;
-  --color-sage: #B8CEB7;
-  --color-sage-light: #DDE9DC;
-  --color-peach: #F5CBAA;
-  --color-peach-light: #FBE7D5;
-  --color-blush: #F2C4C4;
-  --color-blush-light: #FAE4E4;
+  /* Accent — deep indigo (like One Year's blue) */
+  --color-indigo: #2B2BB0;
+  --color-indigo-light: #DDDCF5;
+  --color-indigo-muted: #8888C8;
+
+  /* Pastels — muted, grey-tinted */
+  --color-lilac: #C8C5D8;
+  --color-lilac-light: #E8E6F2;
+  --color-sage: #B5C4B4;
+  --color-sage-light: #D8E2D7;
+  --color-peach: #DCCABC;
+  --color-peach-light: #EDE4DB;
+  --color-blush: #D8BCBC;
+  --color-blush-light: #EDE2E2;
 
   /* Bold accents */
-  --color-cobalt: #3D5A99;
-  --color-terracotta: #C4652E;
+  --color-cobalt: #2B2BB0;
+  --color-terracotta: #A0522D;
   --color-forest: #2D6A4F;
 
   /* Traffic lights */
   --color-safe: #5B9A5B;
-  --color-caution: #D4A039;
-  --color-danger: #C65D5D;
+  --color-caution: #C4A03A;
+  --color-danger: #B85454;
 
-  /* Neutrals - warm tones, never cold */
-  --color-text-primary: #3D3229;
-  --color-text-secondary: #7A6E62;
-  --color-text-muted: #A89E93;
-  --color-border: #E8DFD3;
+  /* Neutrals */
+  --color-text-primary: #2A2A2A;
+  --color-text-secondary: #6B6767;
+  --color-text-muted: #9E9A96;
+  --color-border: #D5D2CE;
 
   /* Fonts */
   --font-mono: 'DM Mono', 'Courier New', monospace;
@@ -54,6 +60,21 @@
   #root {
     min-height: 100vh;
   }
+}
+
+/* Dot grid background — like grid paper */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--color-indigo-muted) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Soft shadows — more blur, less opacity */
+.shadow-soft {
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-soft-lg {
+  box-shadow: 0 8px 40px -4px rgba(0, 0, 0, 0.08);
 }
 
 /* Animations */

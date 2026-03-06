@@ -39,8 +39,8 @@ export default function SearchBar() {
 
   return (
     <div ref={wrapperRef} className="relative">
-      <div className="flex items-center bg-warm-white rounded-2xl shadow-sm border border-border px-4 py-3.5 gap-3 transition-shadow focus-within:shadow-md focus-within:border-lilac">
-        <Search className="w-5 h-5 text-text-muted flex-shrink-0" />
+      <div className="flex items-center bg-warm-white rounded-2xl shadow-soft border border-border px-4 py-3.5 gap-3 transition-all focus-within:shadow-soft-lg focus-within:border-indigo">
+        <Search className="w-5 h-5 text-indigo-muted flex-shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -54,7 +54,7 @@ export default function SearchBar() {
         {query && (
           <button
             onClick={() => { setQuery(''); inputRef.current?.focus() }}
-            className="text-text-muted hover:text-text-secondary text-sm"
+            className="text-text-muted hover:text-indigo text-sm font-mono lowercase"
           >
             clear
           </button>
@@ -62,12 +62,12 @@ export default function SearchBar() {
       </div>
 
       {showSuggestions && filtered.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-warm-white rounded-2xl shadow-md border border-border overflow-hidden z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-warm-white rounded-2xl shadow-soft-lg border border-border overflow-hidden z-10">
           {filtered.map((dish) => (
             <button
               key={dish}
               onClick={() => { setQuery(dish); setShowSuggestions(false); handleSubmit(dish) }}
-              className="w-full text-left px-4 py-3 text-sm font-mono lowercase text-text-primary hover:bg-cream-dark transition-colors border-b border-border last:border-b-0"
+              className="w-full text-left px-4 py-3 text-sm font-mono lowercase text-text-primary hover:bg-indigo-light transition-colors border-b border-border last:border-b-0"
             >
               {dish}
             </button>
