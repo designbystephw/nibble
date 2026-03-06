@@ -125,3 +125,8 @@
 .animate-leaf-sway {
   animation: leaf-sway 3s ease-in-out infinite;
 }
+
+/* Stroke colours for SVG confidence ring */
+.stroke-safe { stroke: var(--color-safe); }
+.stroke-caution { stroke: var(--color-caution); }
+.stroke-danger { stroke: var(--color-danger); }

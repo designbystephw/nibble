@@ -1,4 +1,69 @@
 // Mock scan results for demo purposes — will be replaced with Claude API calls
+
+// Witty commentary based on how "bad" the dish is for you
+const wittyCommentary = {
+  safe: [
+    "Your mum would actually approve of this one.",
+    "Go for it — your gut will thank you.",
+    "Green light. Enjoy without the guilt trip.",
+  ],
+  caution: [
+    "Your mum would probably say no, but moderation is key.",
+    "Not a disaster, but maybe don't make it a daily habit.",
+    "It's a maybe — like texting your ex, proceed with caution.",
+    "Treat yourself, but maybe skip the seconds.",
+  ],
+  danger: [
+    "This one's a minefield for your diet. Maybe sit this one out.",
+    "Your body called — it said absolutely not.",
+    "If your diet had a nemesis, this would be it.",
+    "Let's just say this dish and your restrictions aren't on speaking terms.",
+  ],
+}
+
+function getWittyComment(restrictedPercent) {
+  const pool = restrictedPercent > 40 ? wittyCommentary.danger
+    : restrictedPercent > 20 ? wittyCommentary.caution
+    : wittyCommentary.safe
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+// Category to food group emoji mapping for illustrations
+export const categoryIcons = {
+  carbs: 'rice',
+  protein: 'meat',
+  vegetable: 'vegetable',
+  sauce: 'sauce',
+  spice: 'spice',
+  fat: 'oil',
+  dairy: 'dairy',
+  acid: 'citrus',
+  herb: 'herb',
+  liquid: 'drink',
+  seasoning: 'seasoning',
+}
+
+// Dish category for illustrations
+export const dishCategories = {
+  'Char Kway Teow': 'noodles',
+  'Caesar Salad': 'salad',
+  'Steamed Fish (Cantonese-style)': 'fish',
+}
+
+function buildConfidenceExplanation(result) {
+  const { confidence, recipesScanned, dish } = result
+  const restricted = result.ingredients.filter(i => i.restricted).length
+  const total = result.ingredients.length
+
+  if (confidence >= 85) {
+    return `Nibble cross-referenced ${recipesScanned} recipes for ${dish} and found strong consistency across sources. ${restricted} out of ${total} common ingredients matched your restriction list. The high recipe count gives us confidence in the ingredient breakdown.`
+  } else if (confidence >= 70) {
+    return `We scanned ${recipesScanned} recipes for ${dish}. Most sources agree on the core ingredients, though some variations exist. ${restricted} out of ${total} ingredients flagged against your profile. Some regional variations may use different ingredients.`
+  } else {
+    return `We found ${recipesScanned} recipes for ${dish}, but there's quite a bit of variation between sources. ${restricted} out of ${total} ingredients flagged. Recipes for this dish vary widely — your version may differ from what we found.`
+  }
+}
+
 export const mockScanResults = {
   'char kway teow': {
     dish: 'Char Kway Teow',
@@ -81,10 +146,18 @@ export const mockScanResults = {
 // Generate a plausible mock result for any dish not in the database
 export function generateMockResult(dishName) {
   const known = mockScanResults[dishName.toLowerCase()];
-  if (known) return known;
+  if (known) {
+    // Enrich with witty commentary and confidence explanation
+    const restrictedPercent = (known.ingredients.filter(i => i.restricted).length / known.ingredients.length) * 100
+    return {
+      ...known,
+      wittyComment: getWittyComment(restrictedPercent),
+      confidenceExplanation: buildConfidenceExplanation(known),
+    }
+  }
 
   // Generic fallback result
-  return {
+  const fallback = {
     dish: dishName,
     confidence: 65,
     confidenceLevel: 'medium',
@@ -103,5 +176,12 @@ export function generateMockResult(dishName) {
       { name: 'Various recipes online', url: '#' },
     ],
     summary: 'check-these',
-  };
+  }
+
+  const restrictedPercent = (fallback.ingredients.filter(i => i.restricted).length / fallback.ingredients.length) * 100
+  return {
+    ...fallback,
+    wittyComment: getWittyComment(restrictedPercent),
+    confidenceExplanation: buildConfidenceExplanation(fallback),
+  }
 }

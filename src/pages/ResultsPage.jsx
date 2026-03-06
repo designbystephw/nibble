@@ -1,42 +1,26 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
+import DishIllustration from '../components/DishIllustration'
 import {
   ArrowLeft, Heart, ChevronDown, ChevronUp,
-  ExternalLink, AlertTriangle, CheckCircle, XCircle, Info
+  ExternalLink, Info
 } from 'lucide-react'
 
-const summaryConfig = {
-  'likely-safe': {
-    icon: CheckCircle,
-    label: 'likely safe',
-    sublabel: 'No restricted ingredients detected',
-    bgClass: 'bg-sage-light',
-    dotClass: 'bg-safe',
-    textClass: 'text-forest',
-  },
-  'check-these': {
-    icon: AlertTriangle,
-    label: 'check these',
-    sublabel: 'Some ingredients may be restricted',
-    bgClass: 'bg-warm-white',
-    dotClass: 'bg-caution',
-    textClass: 'text-terracotta',
-  },
-  'contains-restricted': {
-    icon: XCircle,
-    label: 'contains restricted items',
-    sublabel: 'This dish likely contains ingredients you avoid',
-    bgClass: 'bg-blush-light',
-    dotClass: 'bg-danger',
-    textClass: 'text-danger',
-  },
+// Recommendation label based on restricted percentage
+function getRecommendation(restrictedPercent) {
+  if (restrictedPercent > 50) return { label: "don't eat this", position: 90 }
+  if (restrictedPercent > 35) return { label: 'best to avoid', position: 75 }
+  if (restrictedPercent > 20) return { label: 'eat with caution', position: 55 }
+  if (restrictedPercent > 10) return { label: 'mostly fine', position: 30 }
+  return { label: 'go for it', position: 10 }
 }
 
 export default function ResultsPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { isFavourite, toggleFavourite } = useProfile()
+  const [showIngredients, setShowIngredients] = useState(false)
   const [showSources, setShowSources] = useState(false)
 
   const result = location.state?.result
@@ -45,14 +29,19 @@ export default function ResultsPage() {
     return null
   }
 
-  const config = summaryConfig[result.summary] || summaryConfig['check-these']
-  const SummaryIcon = config.icon
   const fav = isFavourite(result.dish)
   const restrictedCount = result.ingredients.filter(i => i.restricted).length
-  const safeCount = result.ingredients.filter(i => !i.restricted).length
+  const totalCount = result.ingredients.length
+  const restrictedPercent = (restrictedCount / totalCount) * 100
+  const recommendation = getRecommendation(restrictedPercent)
 
-  const confidenceLabel = result.confidence >= 80 ? 'high' : result.confidence >= 60 ? 'medium' : 'low'
+  const confidenceLabel = result.confidence >= 80 ? 'Very High' : result.confidence >= 60 ? 'Moderate' : 'Low'
   const confidenceColor = result.confidence >= 80 ? 'text-forest' : result.confidence >= 60 ? 'text-caution' : 'text-danger'
+  const confidenceRingColor = result.confidence >= 80 ? 'stroke-safe' : result.confidence >= 60 ? 'stroke-caution' : 'stroke-danger'
+
+  // SVG circle for confidence ring
+  const circumference = 2 * Math.PI * 36
+  const strokeDash = (result.confidence / 100) * circumference
 
   return (
     <div className="pt-6 pb-8 animate-fade-up" style={{ animationDuration: '0.4s' }}>
@@ -75,89 +64,183 @@ export default function ResultsPage() {
         </button>
       </div>
 
-      {/* Dish name */}
-      <h1 className="font-mono text-xl lowercase text-text-primary mb-2">
-        {result.dish.toLowerCase()}
-      </h1>
-
-      {/* Confidence badge */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="flex items-center gap-1.5 bg-warm-white rounded-full px-3 py-1 border border-border">
-          <div className={`w-2 h-2 rounded-full ${
-            confidenceLabel === 'high' ? 'bg-safe' : confidenceLabel === 'medium' ? 'bg-caution' : 'bg-danger'
-          }`} />
-          <span className={`text-xs font-mono lowercase ${confidenceColor}`}>
-            {confidenceLabel} confidence
-          </span>
+      {/* ═══════════════════════════════════════════ */}
+      {/* DISH NAME + ILLUSTRATION                    */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="flex-1">
+          <h1 className="font-mono text-2xl lowercase text-text-primary leading-tight">
+            {result.dish.toLowerCase()}
+          </h1>
+          <p className="text-xs text-text-muted mt-1 font-mono lowercase">
+            {result.recipesScanned} recipes scanned
+          </p>
         </div>
-        <span className="text-xs text-text-muted">
-          {result.recipesScanned} recipes scanned
-        </span>
+        <DishIllustration
+          dishName={result.dish}
+          className="w-20 h-20 flex-shrink-0 opacity-80"
+        />
       </div>
 
-      {/* Traffic light summary card */}
-      <div className={`${config.bgClass} rounded-3xl p-5 mb-6 shadow-soft border border-border`}>
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center flex-shrink-0">
-            <SummaryIcon className={`w-5 h-5 ${config.textClass}`} />
-          </div>
-          <div>
-            <p className={`font-mono text-sm lowercase font-medium ${config.textClass}`}>
-              {config.label}
-            </p>
-            <p className="text-xs text-text-secondary mt-0.5">
-              {config.sublabel}
-            </p>
-            <div className="flex gap-3 mt-2">
-              <span className="text-xs font-mono text-danger lowercase">{restrictedCount} flagged</span>
-              <span className="text-xs font-mono text-safe lowercase">{safeCount} ok</span>
+      {/* ═══════════════════════════════════════════ */}
+      {/* TO EAT OR NOT TO EAT                       */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="mb-8">
+        <h2 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
+          to eat or not to eat
+        </h2>
+        <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
+          {/* Recommendation label */}
+          <p className={`font-mono text-lg lowercase font-medium mb-1 ${
+            restrictedPercent > 20 ? 'text-danger' : 'text-forest'
+          }`}>
+            {recommendation.label}
+          </p>
+
+          {/* Witty commentary */}
+          <p className="text-sm text-text-secondary leading-relaxed mb-4">
+            {result.wittyComment || "Your mum would probably say no, but moderation is key."}
+          </p>
+
+          {/* Spectrum bar */}
+          <div className="relative mt-2">
+            <div className="flex justify-between text-[10px] font-mono lowercase text-text-muted mb-1.5">
+              <span>eat it</span>
+              <span>skip it</span>
+            </div>
+            <div className="h-3 rounded-full bg-gradient-to-r from-safe via-caution to-danger relative overflow-hidden">
+              {/* Indicator */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-text-primary shadow-soft transition-all duration-700 ease-out"
+                style={{ left: `clamp(8px, calc(${recommendation.position}% - 8px), calc(100% - 16px))` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[10px] font-mono text-safe">{totalCount - restrictedCount} ok</span>
+              <span className="text-[10px] font-mono text-danger">{restrictedCount} flagged</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Ingredients list */}
-      <div className="mb-6">
-        <h3 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
-          ingredients found
-        </h3>
-        <div className="space-y-2">
-          {result.ingredients
-            .sort((a, b) => (b.restricted ? 1 : 0) - (a.restricted ? 1 : 0))
-            .map((ingredient, i) => (
-              <IngredientRow key={i} ingredient={ingredient} />
-            ))}
+      {/* ═══════════════════════════════════════════ */}
+      {/* COMMON INGREDIENTS (collapsible)            */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="mb-8">
+        <button
+          onClick={() => setShowIngredients(!showIngredients)}
+          className="flex items-center justify-between w-full text-left px-1 mb-3"
+        >
+          <h2 className="font-mono text-xs lowercase text-text-muted">
+            common ingredients ({totalCount})
+          </h2>
+          {showIngredients
+            ? <ChevronUp className="w-4 h-4 text-text-muted" />
+            : <ChevronDown className="w-4 h-4 text-text-muted" />
+          }
+        </button>
+        {showIngredients && (
+          <div className="space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
+            {result.ingredients
+              .sort((a, b) => (b.restricted ? 1 : 0) - (a.restricted ? 1 : 0))
+              .map((ingredient, i) => (
+                <IngredientRow key={i} ingredient={ingredient} />
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* NIBBLE'S THOUGHT PROCESS                   */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="mb-8">
+        <h2 className="font-mono text-xs lowercase text-text-muted mb-3 px-1">
+          nibble's thought process
+        </h2>
+        <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
+          {/* Confidence ring + label */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 80 80">
+                {/* Background ring */}
+                <circle
+                  cx="40" cy="40" r="36"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="5"
+                  className="text-border"
+                />
+                {/* Confidence ring */}
+                <circle
+                  cx="40" cy="40" r="36"
+                  fill="none"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  className={confidenceRingColor}
+                  strokeDasharray={`${strokeDash} ${circumference}`}
+                  style={{ transition: 'stroke-dasharray 1s ease-out' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-mono text-sm font-medium text-text-primary">{result.confidence}</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-text-muted">Confidence level</p>
+              <p className={`font-mono text-sm font-medium ${confidenceColor}`}>
+                {confidenceLabel}
+              </p>
+            </div>
+          </div>
+
+          {/* Explanation */}
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {result.confidenceExplanation || `Nibble scanned ${result.recipesScanned} recipes and cross-referenced the ingredients against your dietary profile. ${restrictedCount} out of ${totalCount} common ingredients were flagged.`}
+          </p>
         </div>
       </div>
 
-      {/* Sources */}
-      <div className="mb-6">
+      {/* ═══════════════════════════════════════════ */}
+      {/* REFERENCES (collapsible)                   */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="mb-8">
         <button
           onClick={() => setShowSources(!showSources)}
-          className="flex items-center gap-2 w-full text-left px-1 mb-2"
+          className="flex items-center justify-between w-full text-left px-1 mb-3"
         >
-          <h3 className="font-mono text-xs lowercase text-text-muted">
-            sources scanned ({result.sources.length})
-          </h3>
+          <h2 className="font-mono text-xs lowercase text-text-muted">
+            references ({result.sources.length} sources)
+          </h2>
           {showSources
-            ? <ChevronUp className="w-3.5 h-3.5 text-text-muted" />
-            : <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+            ? <ChevronUp className="w-4 h-4 text-text-muted" />
+            : <ChevronDown className="w-4 h-4 text-text-muted" />
           }
         </button>
         {showSources && (
           <div className="bg-warm-white rounded-2xl border border-border p-4 space-y-2 shadow-soft animate-fade-up" style={{ animationDuration: '0.3s' }}>
             {result.sources.map((source, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <a
+                key={i}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-cream-dark transition-colors group"
+              >
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-muted flex-shrink-0" />
-                <span className="text-xs text-text-secondary">{source.name}</span>
-              </div>
+                <span className="text-sm text-indigo group-hover:underline flex-1">
+                  {source.name}
+                </span>
+                <span className="text-[10px] text-text-muted font-mono">
+                  {source.url !== '#' ? new URL(source.url).hostname : ''}
+                </span>
+              </a>
             ))}
           </div>
         )}
       </div>
 
       {/* Disclaimer */}
-      <div className="bg-warm-white rounded-2xl p-4 flex gap-3 border border-border shadow-soft">
+      <div className="bg-warm-white rounded-2xl p-4 flex gap-3 border border-border shadow-soft mb-6">
         <Info className="w-4 h-4 text-indigo-muted flex-shrink-0 mt-0.5" />
         <p className="text-[11px] text-text-muted leading-relaxed">
           Results are based on common recipes and may vary by restaurant.
@@ -168,7 +251,7 @@ export default function ResultsPage() {
       {/* Search again */}
       <button
         onClick={() => navigate('/')}
-        className="w-full mt-6 bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 shadow-soft hover:opacity-90 transition-opacity"
+        className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 shadow-soft hover:opacity-90 transition-opacity"
       >
         search another dish
       </button>
@@ -189,12 +272,12 @@ function IngredientRow({ ingredient }) {
         <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
           restricted ? 'bg-danger' : 'bg-safe'
         }`} />
-        <span className={`text-sm flex-1 ${restricted ? 'font-medium text-text-primary' : 'text-text-secondary'}`}>
+        <span className={`text-sm flex-1 ${restricted ? 'font-medium text-danger' : 'text-text-secondary'}`}>
           {name}
         </span>
         {restricted && (
-          <span className="text-[10px] font-mono lowercase text-indigo bg-indigo-light rounded-full px-2 py-0.5">
-            restricted
+          <span className="text-[10px] font-mono lowercase text-danger bg-blush-light rounded-full px-2 py-0.5 border border-blush">
+            no-go
           </span>
         )}
       </div>
