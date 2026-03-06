@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Nibble color palette - warm, soft, approachable */
+  --color-cream: #FDF6EE;
+  --color-cream-dark: #F5EBD9;
+  --color-warm-white: #FAF7F2;
+
+  /* Pastels */
+  --color-lilac: #D4C5E2;
+  --color-lilac-light: #EDE6F5;
+  --color-sage: #B8CEB7;
+  --color-sage-light: #DDE9DC;
+  --color-peach: #F5CBAA;
+  --color-peach-light: #FBE7D5;
+  --color-blush: #F2C4C4;
+  --color-blush-light: #FAE4E4;
+
+  /* Bold accents */
+  --color-cobalt: #3D5A99;
+  --color-terracotta: #C4652E;
+  --color-forest: #2D6A4F;
+
+  /* Traffic lights */
+  --color-safe: #5B9A5B;
+  --color-caution: #D4A039;
+  --color-danger: #C65D5D;
+
+  /* Neutrals - warm tones, never cold */
+  --color-text-primary: #3D3229;
+  --color-text-secondary: #7A6E62;
+  --color-text-muted: #A89E93;
+  --color-border: #E8DFD3;
+
+  /* Fonts */
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+  --font-sans: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-cream);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    min-height: 100vh;
+    min-width: 320px;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+/* Animations */
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grow-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes leaf-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+.animate-grow-in {
+  animation: grow-in 0.4s ease-out forwards;
+}
+
+.animate-leaf-sway {
+  animation: leaf-sway 3s ease-in-out infinite;
+}
