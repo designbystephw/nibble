@@ -1,4 +1,6 @@
-// Mock scan results for demo purposes — will be replaced with Claude API calls
+// Mock scan results for demo purposes
+// Ingredients are listed without restriction flags — restrictions are matched
+// dynamically against the user's avoid list at scan time.
 
 // Witty commentary based on how "bad" the dish is for you
 const wittyCommentary = {
@@ -64,35 +66,100 @@ function buildConfidenceExplanation(result) {
   }
 }
 
-export const mockScanResults = {
+// Alias map: maps ingredient names to terms that might appear on avoid lists
+const ingredientAliases = {
+  'flat rice noodles': ['rice noodles', 'noodles', 'white rice', 'glutinous rice'],
+  'prawns': ['prawns', 'shellfish', 'shrimp'],
+  'cockles': ['cockles', 'shellfish', 'molluscs'],
+  'chinese sausage (lap cheong)': ['processed meat', 'sausages', 'pork'],
+  'bean sprouts': ['bean sprouts'],
+  'chinese chives (ku chai)': ['chives'],
+  'eggs': ['eggs'],
+  'egg yolk': ['eggs'],
+  'dark soy sauce': ['soy sauce', 'soy sauce (excessive)', 'soy'],
+  'light soy sauce': ['soy sauce', 'soy sauce (excessive)', 'soy'],
+  'oyster sauce': ['oyster sauce', 'shellfish'],
+  'fish sauce': ['fish sauce'],
+  'chilli': ['chilli', 'spicy food', 'hot sauce', 'cayenne pepper'],
+  'garlic': ['garlic'],
+  'lard': ['lard', 'greasy foods', 'deep-fried foods', 'fatty foods'],
+  'cooking oil': ['vegetable oil', 'soybean oil', 'corn oil', 'palm oil'],
+  'romaine lettuce': ['lettuce', 'salads', 'raw vegetables'],
+  'parmesan cheese': ['parmesan', 'cheese', 'dairy', 'hard cheese'],
+  'croutons': ['croutons', 'wheat', 'bread', 'gluten'],
+  'anchovy (in dressing)': ['anchovies', 'fish'],
+  'lemon juice': ['lemon', 'citrus'],
+  'olive oil': ['olive oil'],
+  'worcestershire sauce': ['worcestershire'],
+  'black pepper': ['black pepper'],
+  'dijon mustard': ['mustard'],
+  'white fish (sea bass / grouper)': ['fish'],
+  'ginger': ['ginger', 'fresh ginger'],
+  'spring onion': ['spring onion', 'onion', 'shallots'],
+  'sesame oil': ['sesame oil', 'sesame'],
+  'shaoxing wine': ['alcohol', 'wine'],
+  'coriander': ['coriander'],
+  'sugar': ['sugar', 'refined sugar'],
+  'salt': ['salt', 'sodium'],
+  'onion': ['onion', 'shallots'],
+  'soy sauce': ['soy sauce', 'soy sauce (excessive)', 'soy'],
+}
+
+function matchRestrictions(ingredientName, avoidList) {
+  const lowerName = ingredientName.toLowerCase()
+  const lowerAvoidList = avoidList.map(a => a.toLowerCase())
+
+  // Direct match against avoid list
+  for (const avoided of lowerAvoidList) {
+    if (lowerName.includes(avoided) || avoided.includes(lowerName)) {
+      return { restricted: true, reason: `${avoided} — on your avoid list` }
+    }
+  }
+
+  // Alias match
+  const aliases = ingredientAliases[lowerName] || []
+  for (const alias of aliases) {
+    const lowerAlias = alias.toLowerCase()
+    for (const avoided of lowerAvoidList) {
+      if (lowerAlias.includes(avoided) || avoided.includes(lowerAlias)) {
+        return { restricted: true, reason: `Related to ${avoided} — on your avoid list` }
+      }
+    }
+  }
+
+  return { restricted: false, reason: null }
+}
+
+// Raw dish data — ingredients only, no restriction flags
+// Sources link to actual recipe pages for each specific dish
+const dishDatabase = {
   'char kway teow': {
     dish: 'Char Kway Teow',
     confidence: 87,
     confidenceLevel: 'high',
     recipesScanned: 12,
     ingredients: [
-      { name: 'flat rice noodles (kway teow)', restricted: false, category: 'carbs' },
-      { name: 'prawns', restricted: true, reason: 'Shellfish — restricted on your diet', category: 'protein' },
-      { name: 'cockles', restricted: true, reason: 'Shellfish — restricted on your diet', category: 'protein' },
-      { name: 'Chinese sausage (lap cheong)', restricted: true, reason: 'Processed meat — may trigger flare-ups', category: 'protein' },
-      { name: 'bean sprouts', restricted: false, category: 'vegetable' },
-      { name: 'chives', restricted: false, category: 'vegetable' },
-      { name: 'eggs', restricted: false, category: 'protein' },
-      { name: 'dark soy sauce', restricted: false, category: 'sauce' },
-      { name: 'light soy sauce', restricted: false, category: 'sauce' },
-      { name: 'oyster sauce', restricted: true, reason: 'Contains shellfish extract — restricted on your diet', category: 'sauce' },
-      { name: 'fish sauce', restricted: true, reason: 'Fish sauce — restricted on your diet', category: 'sauce' },
-      { name: 'chilli', restricted: true, reason: 'Spicy ingredients — may aggravate your condition', category: 'spice' },
-      { name: 'garlic', restricted: true, reason: 'Garlic — restricted on your diet', category: 'spice' },
-      { name: 'lard / cooking oil', restricted: true, reason: 'Greasy/fatty cooking base — restricted', category: 'fat' },
+      { name: 'flat rice noodles', category: 'carbs' },
+      { name: 'prawns', category: 'protein' },
+      { name: 'cockles', category: 'protein' },
+      { name: 'Chinese sausage (lap cheong)', category: 'protein' },
+      { name: 'bean sprouts', category: 'vegetable' },
+      { name: 'Chinese chives (ku chai)', category: 'vegetable' },
+      { name: 'eggs', category: 'protein' },
+      { name: 'dark soy sauce', category: 'sauce' },
+      { name: 'light soy sauce', category: 'sauce' },
+      { name: 'oyster sauce', category: 'sauce' },
+      { name: 'fish sauce', category: 'sauce' },
+      { name: 'chilli', category: 'spice' },
+      { name: 'garlic', category: 'spice' },
+      { name: 'lard', category: 'fat' },
     ],
     sources: [
-      { name: 'Woks of Life', url: 'https://thewoksoflife.com' },
-      { name: 'RecipeTin Eats', url: 'https://recipetineats.com' },
-      { name: 'Serious Eats', url: 'https://seriouseats.com' },
-      { name: 'Rasa Malaysia', url: 'https://rasamalaysia.com' },
+      { name: 'Woks of Life — Penang Char Kway Teow', url: 'https://thewoksoflife.com/char-kway-teow/' },
+      { name: 'RecipeTin Eats — Char Kway Teow', url: 'https://www.recipetineats.com/char-kway-teow/' },
+      { name: 'Rasa Malaysia — Char Kuey Teow', url: 'https://rasamalaysia.com/char-kuey-teow-recipe/' },
+      { name: 'Serious Eats — Char Kway Teow', url: 'https://www.seriouseats.com/char-kway-teow-malaysian-stir-fried-rice-noodles-recipe' },
     ],
-    summary: 'contains-restricted',
   },
   'caesar salad': {
     dish: 'Caesar Salad',
@@ -100,25 +167,24 @@ export const mockScanResults = {
     confidenceLevel: 'high',
     recipesScanned: 18,
     ingredients: [
-      { name: 'romaine lettuce', restricted: false, category: 'vegetable' },
-      { name: 'parmesan cheese', restricted: true, reason: 'Dairy — restricted on your diet', category: 'dairy' },
-      { name: 'croutons', restricted: true, reason: 'Wheat/gluten — restricted on your diet', category: 'carbs' },
-      { name: 'anchovy (in dressing)', restricted: false, category: 'protein' },
-      { name: 'egg yolk (in dressing)', restricted: false, category: 'protein' },
-      { name: 'garlic', restricted: true, reason: 'Garlic — restricted on your diet', category: 'spice' },
-      { name: 'lemon juice', restricted: false, category: 'acid' },
-      { name: 'olive oil', restricted: false, category: 'fat' },
-      { name: 'Worcestershire sauce', restricted: false, category: 'sauce' },
-      { name: 'black pepper', restricted: false, category: 'spice' },
+      { name: 'romaine lettuce', category: 'vegetable' },
+      { name: 'parmesan cheese', category: 'dairy' },
+      { name: 'croutons', category: 'carbs' },
+      { name: 'anchovy (in dressing)', category: 'protein' },
+      { name: 'egg yolk', category: 'protein' },
+      { name: 'garlic', category: 'spice' },
+      { name: 'lemon juice', category: 'acid' },
+      { name: 'olive oil', category: 'fat' },
+      { name: 'Worcestershire sauce', category: 'sauce' },
+      { name: 'dijon mustard', category: 'sauce' },
+      { name: 'black pepper', category: 'spice' },
     ],
     sources: [
-      { name: 'Serious Eats', url: 'https://seriouseats.com' },
-      { name: "J. Kenji López-Alt", url: 'https://seriouseats.com' },
-      { name: 'Bon Appétit', url: 'https://bonappetit.com' },
-      { name: 'Food Network', url: 'https://foodnetwork.com' },
-      { name: 'RecipeTin Eats', url: 'https://recipetineats.com' },
+      { name: 'Serious Eats — The Best Caesar Salad', url: 'https://www.seriouseats.com/the-best-caesar-salad-recipe' },
+      { name: 'Bon Appétit — Classic Caesar Salad', url: 'https://www.bonappetit.com/recipe/classic-caesar-salad' },
+      { name: 'RecipeTin Eats — Caesar Salad', url: 'https://www.recipetineats.com/caesar-salad/' },
+      { name: 'Food Network — Caesar Salad', url: 'https://www.foodnetwork.com/recipes/bobby-flay/caesar-salad-recipe-1942741' },
     ],
-    summary: 'check-these',
   },
   'steamed fish': {
     dish: 'Steamed Fish (Cantonese-style)',
@@ -126,62 +192,69 @@ export const mockScanResults = {
     confidenceLevel: 'high',
     recipesScanned: 14,
     ingredients: [
-      { name: 'white fish (sea bass / grouper)', restricted: false, category: 'protein' },
-      { name: 'ginger (fresh)', restricted: false, category: 'spice' },
-      { name: 'spring onion', restricted: true, reason: 'Onion family — restricted on your diet', category: 'vegetable' },
-      { name: 'light soy sauce', restricted: false, category: 'sauce' },
-      { name: 'sesame oil', restricted: false, category: 'fat' },
-      { name: 'shaoxing wine', restricted: true, reason: 'Alcohol — restricted on your diet', category: 'liquid' },
-      { name: 'coriander', restricted: false, category: 'herb' },
+      { name: 'white fish (sea bass / grouper)', category: 'protein' },
+      { name: 'ginger', category: 'spice' },
+      { name: 'spring onion', category: 'vegetable' },
+      { name: 'light soy sauce', category: 'sauce' },
+      { name: 'sesame oil', category: 'fat' },
+      { name: 'shaoxing wine', category: 'liquid' },
+      { name: 'sugar', category: 'seasoning' },
+      { name: 'coriander', category: 'herb' },
+      { name: 'cooking oil', category: 'fat' },
     ],
     sources: [
-      { name: 'Woks of Life', url: 'https://thewoksoflife.com' },
-      { name: 'China Sichuan Food', url: 'https://chinasichuanfood.com' },
-      { name: 'RecipeTin Eats', url: 'https://recipetineats.com' },
+      { name: 'Woks of Life — Cantonese Steamed Fish', url: 'https://thewoksoflife.com/steamed-whole-fish/' },
+      { name: 'China Sichuan Food — Steamed Fish', url: 'https://www.chinasichuanfood.com/chinese-steamed-fish/' },
+      { name: 'RecipeTin Eats — Chinese Steamed Fish', url: 'https://www.recipetineats.com/chinese-steamed-fish/' },
+      { name: 'Taste — Cantonese Steamed Fish', url: 'https://www.taste.com.au/recipes/cantonese-style-steamed-fish/d93ab0f9-2686-4a76-bea0-cc920d5e0e9f' },
     ],
-    summary: 'check-these',
   },
 };
 
-// Generate a plausible mock result for any dish not in the database
-export function generateMockResult(dishName) {
-  const known = mockScanResults[dishName.toLowerCase()];
-  if (known) {
-    // Enrich with witty commentary and confidence explanation
-    const restrictedPercent = (known.ingredients.filter(i => i.restricted).length / known.ingredients.length) * 100
-    return {
-      ...known,
-      wittyComment: getWittyComment(restrictedPercent),
-      confidenceExplanation: buildConfidenceExplanation(known),
-    }
-  }
+// Fallback ingredients for unknown dishes
+const fallbackIngredients = [
+  { name: 'cooking oil', category: 'fat' },
+  { name: 'garlic', category: 'spice' },
+  { name: 'onion', category: 'vegetable' },
+  { name: 'soy sauce', category: 'sauce' },
+  { name: 'salt', category: 'seasoning' },
+  { name: 'sugar', category: 'seasoning' },
+  { name: 'protein (varies)', category: 'protein' },
+  { name: 'vegetables (varies)', category: 'vegetable' },
+]
 
-  // Generic fallback result
-  const fallback = {
+// Generate a result for any dish, dynamically matching against the user's avoid list
+export function generateMockResult(dishName, avoidList = []) {
+  const known = dishDatabase[dishName.toLowerCase()]
+
+  const baseData = known || {
     dish: dishName,
     confidence: 65,
     confidenceLevel: 'medium',
     recipesScanned: 6,
-    ingredients: [
-      { name: 'cooking oil', restricted: true, reason: 'Greasy cooking base — may be restricted', category: 'fat' },
-      { name: 'garlic', restricted: true, reason: 'Garlic — restricted on your diet', category: 'spice' },
-      { name: 'onion', restricted: true, reason: 'Onion — restricted on your diet', category: 'vegetable' },
-      { name: 'soy sauce', restricted: false, category: 'sauce' },
-      { name: 'salt', restricted: false, category: 'seasoning' },
-      { name: 'sugar', restricted: true, reason: 'Sugar — restricted on your diet', category: 'seasoning' },
-      { name: 'protein (varies)', restricted: false, category: 'protein' },
-      { name: 'vegetables (varies)', restricted: false, category: 'vegetable' },
-    ],
+    ingredients: fallbackIngredients,
     sources: [
       { name: 'Various recipes online', url: '#' },
     ],
-    summary: 'check-these',
   }
 
-  const restrictedPercent = (fallback.ingredients.filter(i => i.restricted).length / fallback.ingredients.length) * 100
+  // Dynamically flag restricted ingredients based on user's avoid list
+  const ingredients = baseData.ingredients.map(ing => {
+    const { restricted, reason } = matchRestrictions(ing.name, avoidList)
+    return { ...ing, restricted, reason }
+  })
+
+  const restrictedPercent = ingredients.length > 0
+    ? (ingredients.filter(i => i.restricted).length / ingredients.length) * 100
+    : 0
+
   return {
-    ...fallback,
+    ...baseData,
+    ingredients,
     wittyComment: getWittyComment(restrictedPercent),
-    confidenceExplanation: buildConfidenceExplanation(fallback),
+    confidenceExplanation: buildConfidenceExplanation({ ...baseData, ingredients }),
   }
 }
+
+// Re-export for backward compat
+export const mockScanResults = dishDatabase;

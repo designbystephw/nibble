@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import ScanPage from './pages/ScanPage'
 import ResultsPage from './pages/ResultsPage'
 import ProfilePage from './pages/ProfilePage'
+import AccountPage from './pages/AccountPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/account" element={<AccountPage />} />
       </Route>
     </Routes>
   )

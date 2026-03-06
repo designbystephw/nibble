@@ -1,7 +1,31 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { dietPresets } from '../data/dietPresets';
 
 const ProfileContext = createContext(null);
+
+const STORAGE_KEYS = {
+  profiles: 'nibble_profiles',
+  activeProfileId: 'nibble_activeProfileId',
+  searchHistory: 'nibble_searchHistory',
+  favourites: 'nibble_favourites',
+  customDiets: 'nibble_customDiets',
+  account: 'nibble_account',
+};
+
+function loadFromStorage(key, fallback) {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveToStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch { /* quota exceeded — silently fail */ }
+}
 
 const DEFAULT_PROFILE = {
   id: 'default',
@@ -13,11 +37,32 @@ const DEFAULT_PROFILE = {
 };
 
 export function ProfileProvider({ children }) {
-  const [profiles, setProfiles] = useState([DEFAULT_PROFILE]);
-  const [activeProfileId, setActiveProfileId] = useState('default');
-  const [searchHistory, setSearchHistory] = useState([]);
-  const [favourites, setFavourites] = useState([]);
-  const [customDiets, setCustomDiets] = useState([]);
+  const [profiles, setProfiles] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.profiles, [DEFAULT_PROFILE])
+  );
+  const [activeProfileId, setActiveProfileId] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.activeProfileId, 'default')
+  );
+  const [searchHistory, setSearchHistory] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.searchHistory, [])
+  );
+  const [favourites, setFavourites] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.favourites, [])
+  );
+  const [customDiets, setCustomDiets] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.customDiets, [])
+  );
+  const [account, setAccount] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.account, null)
+  );
+
+  // Persist to localStorage on change
+  useEffect(() => { saveToStorage(STORAGE_KEYS.profiles, profiles) }, [profiles]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.activeProfileId, activeProfileId) }, [activeProfileId]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.searchHistory, searchHistory) }, [searchHistory]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.favourites, favourites) }, [favourites]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.customDiets, customDiets) }, [customDiets]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.account, account) }, [account]);
 
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
 
@@ -60,6 +105,27 @@ export function ProfileProvider({ children }) {
     setCustomDiets(prev => prev.filter(d => d.id !== id));
   }, []);
 
+  // Account methods
+  const signUp = useCallback((email, name) => {
+    const newAccount = { email, name, createdAt: new Date().toISOString() };
+    setAccount(newAccount);
+    return newAccount;
+  }, []);
+
+  const signIn = useCallback((email) => {
+    // Check if account exists in localStorage
+    const stored = loadFromStorage(STORAGE_KEYS.account, null);
+    if (stored && stored.email === email) {
+      setAccount(stored);
+      return stored;
+    }
+    return null;
+  }, []);
+
+  const signOut = useCallback(() => {
+    setAccount(null);
+  }, []);
+
   return (
     <ProfileContext.Provider value={{
       profiles,
@@ -75,6 +141,10 @@ export function ProfileProvider({ children }) {
       addCustomDiet,
       updateCustomDiet,
       removeCustomDiet,
+      account,
+      signUp,
+      signIn,
+      signOut,
     }}>
       {children}
     </ProfileContext.Provider>

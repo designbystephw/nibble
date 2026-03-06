@@ -14,7 +14,7 @@ const loadingSteps = [
 export default function ScanPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { addToHistory } = useProfile()
+  const { addToHistory, activeProfile } = useProfile()
   const dish = location.state?.dish
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -32,7 +32,7 @@ export default function ScanPage() {
         setCurrentStep(stepIndex)
         setTimeout(advanceStep, loadingSteps[stepIndex].duration)
       } else {
-        const result = generateMockResult(dish)
+        const result = generateMockResult(dish, activeProfile.avoidList)
         addToHistory(result)
         navigate('/results', { state: { result }, replace: true })
       }
@@ -40,7 +40,7 @@ export default function ScanPage() {
 
     const timer = setTimeout(advanceStep, loadingSteps[0].duration)
     return () => clearTimeout(timer)
-  }, [dish, navigate, addToHistory])
+  }, [dish, navigate, addToHistory, activeProfile.avoidList])
 
   if (!dish) return null
 

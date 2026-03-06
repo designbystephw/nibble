@@ -52,9 +52,12 @@ export default function ProfilePage() {
   }
 
   function removeIngredient(ingredient) {
-    updateProfile(activeProfile.id, {
-      avoidList: activeProfile.avoidList.filter(i => i !== ingredient),
-    })
+    const newList = activeProfile.avoidList.filter(i => i !== ingredient)
+    updateProfile(activeProfile.id, { avoidList: newList })
+    // Sync back to custom diet object if editing a custom diet
+    if (isCustom) {
+      updateCustomDiet(activeProfile.presetId, { avoidList: newList })
+    }
   }
 
   // Filter known ingredients based on input, excluding already-added ones
@@ -72,9 +75,12 @@ export default function ProfilePage() {
     // Only allow known ingredients
     if (!item || !knownIngredients.includes(item)) return
     if (activeProfile.avoidList.map(a => a.toLowerCase()).includes(item)) return
-    updateProfile(activeProfile.id, {
-      avoidList: [...activeProfile.avoidList, item],
-    })
+    const newList = [...activeProfile.avoidList, item]
+    updateProfile(activeProfile.id, { avoidList: newList })
+    // Sync back to custom diet object if editing a custom diet
+    if (isCustom) {
+      updateCustomDiet(activeProfile.presetId, { avoidList: newList })
+    }
     setCustomInput('')
     setShowIngredientSuggestions(false)
     setSelectedSuggestionIndex(-1)
@@ -133,7 +139,14 @@ export default function ProfilePage() {
       isCustom: true,
     }
     addCustomDiet(newDiet)
-    handlePresetChange(id)
+    // Directly update profile with the new diet's data instead of going through
+    // handlePresetChange, which can't find the diet in stale state
+    updateProfile(activeProfile.id, {
+      presetId: newDiet.id,
+      name: newDiet.name,
+      color: newDiet.color,
+      avoidList: newDiet.avoidList,
+    })
     setShowAddCustom(false)
     setNewDietName('')
     setStartFromPreset(null)
