@@ -394,7 +394,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
                 {startFromPreset && (
-                  <p className="text-[11px] text-text-secondary mt-2">
+                  <p className="text-[13px] text-text-secondary mt-2">
                     Similar to {dietPresets.find(p => p.id === startFromPreset)?.name}? We'll copy its avoid list so you don't start from scratch.
                   </p>
                 )}
@@ -503,7 +503,7 @@ export default function ProfilePage() {
 
       {/* Info note */}
       <div className="bg-warm-white rounded-2xl p-4 border border-border shadow-soft">
-        <p className="text-[11px] text-text-secondary leading-relaxed">
+        <p className="text-[13px] text-text-secondary leading-relaxed">
           Presets are a starting point — customise to match your practitioner's guidance.
           Your avoid list is used to flag ingredients when scanning dishes.
         </p>

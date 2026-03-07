@@ -53,16 +53,17 @@ export const dishCategories = {
 }
 
 function buildConfidenceExplanation(result) {
-  const { confidence, recipesScanned, dish } = result
+  const { confidence, dish } = result
   const restricted = result.ingredients.filter(i => i.restricted).length
   const total = result.ingredients.length
+  const sourceCount = result.sources.length
 
   if (confidence >= 85) {
-    return `Nibble cross-referenced ${recipesScanned} recipes for ${dish} and found strong consistency across sources. ${restricted} out of ${total} common ingredients matched your restriction list. The high recipe count gives us confidence in the ingredient breakdown.`
+    return `Nibble cross-referenced ${sourceCount} recipes for ${dish} and found strong consistency across sources. ${restricted} out of ${total} common ingredients matched your restriction list. The high recipe count gives us confidence in the ingredient breakdown.`
   } else if (confidence >= 70) {
-    return `We scanned ${recipesScanned} recipes for ${dish}. Most sources agree on the core ingredients, though some variations exist. ${restricted} out of ${total} ingredients flagged against your profile. Some regional variations may use different ingredients.`
+    return `We scanned ${sourceCount} recipes for ${dish}. Most sources agree on the core ingredients, though some variations exist. ${restricted} out of ${total} ingredients flagged against your profile. Some regional variations may use different ingredients.`
   } else {
-    return `We found ${recipesScanned} recipes for ${dish}, but there's quite a bit of variation between sources. ${restricted} out of ${total} ingredients flagged. Recipes for this dish vary widely — your version may differ from what we found.`
+    return `We found ${sourceCount} recipes for ${dish}, but there's quite a bit of variation between sources. ${restricted} out of ${total} ingredients flagged. Recipes for this dish vary widely — your version may differ from what we found.`
   }
 }
 
@@ -103,6 +104,29 @@ const ingredientAliases = {
   'salt': ['salt', 'sodium'],
   'onion': ['onion', 'shallots'],
   'soy sauce': ['soy sauce', 'soy sauce (excessive)', 'soy'],
+  // Specific proteins
+  'chicken (used in some recipes)': ['chicken', 'poultry'],
+  'pork belly (used in some recipes)': ['pork', 'red meat'],
+  'tofu (used in some recipes)': ['tofu', 'soy'],
+  'beef (used in some recipes)': ['beef', 'red meat'],
+  // Specific vegetables
+  'shiitake mushrooms (used in some recipes)': ['mushrooms'],
+  'bok choy (used in some recipes)': ['bok choy'],
+  'carrots (used in some recipes)': ['carrots'],
+  'broccoli (used in some recipes)': ['broccoli'],
+  'capsicum (used in some recipes)': ['capsicum', 'bell pepper'],
+  // Herbs
+  'chrysanthemum': ['chrysanthemum'],
+  'hawthorn': ['hawthorn'],
+  'goji berries': ['goji berries', 'goji'],
+  'astragalus': ['astragalus'],
+  'dong quai': ['dong quai', 'angelica'],
+  'licorice root': ['licorice', 'licorice root'],
+  'lotus seed': ['lotus seed'],
+  'red dates (jujube)': ['red dates', 'jujube'],
+  'wolfberry': ['wolfberry', 'goji'],
+  'barley (chinese)': ['barley'],
+  'coix seed (job\'s tears)': ['coix seed', 'job\'s tears'],
 }
 
 function matchRestrictions(ingredientName, avoidList) {
@@ -137,7 +161,6 @@ const dishDatabase = {
     dish: 'Char Kway Teow',
     confidence: 87,
     confidenceLevel: 'high',
-    recipesScanned: 12,
     ingredients: [
       { name: 'flat rice noodles', category: 'carbs' },
       { name: 'prawns', category: 'protein' },
@@ -155,17 +178,16 @@ const dishDatabase = {
       { name: 'lard', category: 'fat' },
     ],
     sources: [
-      { name: 'Woks of Life — Penang Char Kway Teow', url: 'https://thewoksoflife.com/char-kway-teow/' },
-      { name: 'RecipeTin Eats — Char Kway Teow', url: 'https://www.recipetineats.com/char-kway-teow/' },
-      { name: 'Rasa Malaysia — Char Kuey Teow', url: 'https://rasamalaysia.com/char-kuey-teow-recipe/' },
-      { name: 'Serious Eats — Char Kway Teow', url: 'https://www.seriouseats.com/char-kway-teow-malaysian-stir-fried-rice-noodles-recipe' },
+      { name: 'Penang Char Kway Teow', url: 'https://thewoksoflife.com/char-kway-teow/', site: 'thewoksoflife.com' },
+      { name: 'Char Kway Teow', url: 'https://www.recipetineats.com/char-kway-teow/', site: 'recipetineats.com' },
+      { name: 'Char Kuey Teow Recipe', url: 'https://rasamalaysia.com/char-kuey-teow-recipe/', site: 'rasamalaysia.com' },
+      { name: 'Char Kway Teow', url: 'https://www.seriouseats.com/char-kway-teow-malaysian-stir-fried-rice-noodles-recipe', site: 'seriouseats.com' },
     ],
   },
   'caesar salad': {
     dish: 'Caesar Salad',
     confidence: 92,
     confidenceLevel: 'high',
-    recipesScanned: 18,
     ingredients: [
       { name: 'romaine lettuce', category: 'vegetable' },
       { name: 'parmesan cheese', category: 'dairy' },
@@ -180,17 +202,16 @@ const dishDatabase = {
       { name: 'black pepper', category: 'spice' },
     ],
     sources: [
-      { name: 'Serious Eats — The Best Caesar Salad', url: 'https://www.seriouseats.com/the-best-caesar-salad-recipe' },
-      { name: 'Bon Appétit — Classic Caesar Salad', url: 'https://www.bonappetit.com/recipe/classic-caesar-salad' },
-      { name: 'RecipeTin Eats — Caesar Salad', url: 'https://www.recipetineats.com/caesar-salad/' },
-      { name: 'Food Network — Caesar Salad', url: 'https://www.foodnetwork.com/recipes/bobby-flay/caesar-salad-recipe-1942741' },
+      { name: 'The Best Caesar Salad', url: 'https://www.seriouseats.com/the-best-caesar-salad-recipe', site: 'seriouseats.com' },
+      { name: 'Classic Caesar Salad', url: 'https://www.bonappetit.com/recipe/classic-caesar-salad', site: 'bonappetit.com' },
+      { name: 'Caesar Salad', url: 'https://www.recipetineats.com/caesar-salad/', site: 'recipetineats.com' },
+      { name: 'Caesar Salad Recipe', url: 'https://www.foodnetwork.com/recipes/bobby-flay/caesar-salad-recipe-1942741', site: 'foodnetwork.com' },
     ],
   },
   'steamed fish': {
     dish: 'Steamed Fish (Cantonese-style)',
     confidence: 90,
     confidenceLevel: 'high',
-    recipesScanned: 14,
     ingredients: [
       { name: 'white fish (sea bass / grouper)', category: 'protein' },
       { name: 'ginger', category: 'spice' },
@@ -203,15 +224,15 @@ const dishDatabase = {
       { name: 'cooking oil', category: 'fat' },
     ],
     sources: [
-      { name: 'Woks of Life — Cantonese Steamed Fish', url: 'https://thewoksoflife.com/steamed-whole-fish/' },
-      { name: 'China Sichuan Food — Steamed Fish', url: 'https://www.chinasichuanfood.com/chinese-steamed-fish/' },
-      { name: 'RecipeTin Eats — Chinese Steamed Fish', url: 'https://www.recipetineats.com/chinese-steamed-fish/' },
-      { name: 'Taste — Cantonese Steamed Fish', url: 'https://www.taste.com.au/recipes/cantonese-style-steamed-fish/d93ab0f9-2686-4a76-bea0-cc920d5e0e9f' },
+      { name: 'Cantonese Steamed Fish', url: 'https://thewoksoflife.com/steamed-whole-fish/', site: 'thewoksoflife.com' },
+      { name: 'Chinese Steamed Fish', url: 'https://www.chinasichuanfood.com/chinese-steamed-fish/', site: 'chinasichuanfood.com' },
+      { name: 'Chinese Steamed Fish', url: 'https://www.recipetineats.com/chinese-steamed-fish/', site: 'recipetineats.com' },
+      { name: 'Cantonese Steamed Fish', url: 'https://www.taste.com.au/recipes/cantonese-style-steamed-fish/d93ab0f9-2686-4a76-bea0-cc920d5e0e9f', site: 'taste.com.au' },
     ],
   },
 };
 
-// Fallback ingredients for unknown dishes
+// Fallback ingredients for unknown dishes — specific rather than vague
 const fallbackIngredients = [
   { name: 'cooking oil', category: 'fat' },
   { name: 'garlic', category: 'spice' },
@@ -219,9 +240,23 @@ const fallbackIngredients = [
   { name: 'soy sauce', category: 'sauce' },
   { name: 'salt', category: 'seasoning' },
   { name: 'sugar', category: 'seasoning' },
-  { name: 'protein (varies)', category: 'protein' },
-  { name: 'vegetables (varies)', category: 'vegetable' },
+  { name: 'chicken (used in some recipes)', category: 'protein' },
+  { name: 'pork belly (used in some recipes)', category: 'protein' },
+  { name: 'tofu (used in some recipes)', category: 'protein' },
+  { name: 'shiitake mushrooms (used in some recipes)', category: 'vegetable' },
+  { name: 'bok choy (used in some recipes)', category: 'vegetable' },
+  { name: 'carrots (used in some recipes)', category: 'vegetable' },
 ]
+
+// Generate fallback sources based on dish name using real recipe search URLs
+function generateFallbackSources(dishName) {
+  const encoded = encodeURIComponent(dishName)
+  return [
+    { name: `${dishName} recipe`, url: `https://www.allrecipes.com/search?q=${encoded}`, site: 'allrecipes.com' },
+    { name: `${dishName} recipe`, url: `https://www.seriouseats.com/search?q=${encoded}`, site: 'seriouseats.com' },
+    { name: `${dishName} recipe`, url: `https://www.recipetineats.com/?s=${encoded}`, site: 'recipetineats.com' },
+  ]
+}
 
 // Generate a result for any dish, dynamically matching against the user's avoid list
 export function generateMockResult(dishName, avoidList = []) {
@@ -231,11 +266,8 @@ export function generateMockResult(dishName, avoidList = []) {
     dish: dishName,
     confidence: 65,
     confidenceLevel: 'medium',
-    recipesScanned: 6,
     ingredients: fallbackIngredients,
-    sources: [
-      { name: 'Various recipes online', url: '#' },
-    ],
+    sources: generateFallbackSources(dishName),
   }
 
   // Dynamically flag restricted ingredients based on user's avoid list
@@ -248,12 +280,16 @@ export function generateMockResult(dishName, avoidList = []) {
     ? (ingredients.filter(i => i.restricted).length / ingredients.length) * 100
     : 0
 
-  return {
+  const result = {
     ...baseData,
     ingredients,
+    recipesScanned: baseData.sources.length,
     wittyComment: getWittyComment(restrictedPercent),
-    confidenceExplanation: buildConfidenceExplanation({ ...baseData, ingredients }),
   }
+
+  result.confidenceExplanation = buildConfidenceExplanation(result)
+
+  return result
 }
 
 // Re-export for backward compat

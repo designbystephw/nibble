@@ -76,7 +76,7 @@ export default function SearchBar() {
       {showIdleSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-warm-white rounded-2xl shadow-soft-lg border border-border overflow-hidden z-10">
           <div className="px-4 pt-3 pb-1">
-            <p className="text-[11px] font-mono lowercase text-indigo">suggestions</p>
+            <p className="text-[13px] font-mono lowercase text-indigo">suggestions</p>
           </div>
           {idleSuggestions.map((dish) => (
             <button

@@ -16,6 +16,16 @@ function getRecommendation(restrictedPercent) {
   return { label: 'go for it', position: 10 }
 }
 
+// Get favicon URL for a given site hostname
+function getFaviconUrl(url) {
+  try {
+    const hostname = new URL(url).hostname
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
+  } catch {
+    return null
+  }
+}
+
 export default function ResultsPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -34,6 +44,7 @@ export default function ResultsPage() {
   const totalCount = result.ingredients.length
   const restrictedPercent = (restrictedCount / totalCount) * 100
   const recommendation = getRecommendation(restrictedPercent)
+  const sourceCount = result.sources.length
 
   const confidenceLabel = result.confidence >= 80 ? 'Very High' : result.confidence >= 60 ? 'Moderate' : 'Low'
   const confidenceColor = result.confidence >= 80 ? 'text-forest' : result.confidence >= 60 ? 'text-caution' : 'text-danger'
@@ -71,7 +82,7 @@ export default function ResultsPage() {
             {result.dish.toLowerCase()}
           </h1>
           <p className="text-xs text-text-secondary mt-1 font-mono lowercase">
-            {result.recipesScanned} recipes scanned
+            {sourceCount} recipes scanned
           </p>
         </div>
         <DishIllustration
@@ -80,12 +91,13 @@ export default function ResultsPage() {
         />
       </div>
 
-      {/* TO EAT OR NOT TO EAT */}
+      {/* TO EAT OR NOT TO EAT — heading inside card */}
       <div className="mb-8">
-        <h2 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
-          to eat or not to eat
-        </h2>
         <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
+          <h2 className="font-mono text-xs lowercase text-indigo mb-3">
+            to eat or not to eat
+          </h2>
+
           {/* Recommendation label */}
           <p className={`font-mono text-lg lowercase font-medium mb-1 ${
             restrictedPercent > 20 ? 'text-danger' : 'text-forest'
@@ -100,7 +112,7 @@ export default function ResultsPage() {
 
           {/* Spectrum bar */}
           <div className="relative mt-2">
-            <div className="flex justify-between text-[10px] font-mono lowercase text-text-secondary mb-1.5">
+            <div className="flex justify-between text-[13px] font-mono lowercase text-text-secondary mb-1.5">
               <span>eat it</span>
               <span>skip it</span>
             </div>
@@ -112,8 +124,8 @@ export default function ResultsPage() {
               />
             </div>
             <div className="flex justify-between mt-1.5">
-              <span className="text-[10px] font-mono text-safe">{totalCount - restrictedCount} ok</span>
-              <span className="text-[10px] font-mono text-danger">{restrictedCount} flagged</span>
+              <span className="text-[13px] font-mono text-safe">{totalCount - restrictedCount} ok</span>
+              <span className="text-[13px] font-mono text-danger">{restrictedCount} flagged</span>
             </div>
           </div>
         </div>
@@ -146,12 +158,13 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* NIBBLE'S THOUGHT PROCESS */}
+      {/* NIBBLE'S THOUGHT PROCESS — heading inside card */}
       <div className="mb-8">
-        <h2 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
-          nibble's thought process
-        </h2>
         <div className="bg-warm-white rounded-3xl p-5 border border-border shadow-soft">
+          <h2 className="font-mono text-xs lowercase text-indigo mb-3">
+            nibble's thought process
+          </h2>
+
           {/* Confidence ring + label */}
           <div className="flex items-center gap-4 mb-4">
             <div className="relative w-16 h-16 flex-shrink-0">
@@ -189,21 +202,38 @@ export default function ResultsPage() {
 
           {/* Explanation */}
           <p className="text-sm text-text-primary leading-relaxed">
-            {result.confidenceExplanation || `Nibble scanned ${result.recipesScanned} recipes and cross-referenced the ingredients against your dietary profile. ${restrictedCount} out of ${totalCount} common ingredients were flagged.`}
+            {result.confidenceExplanation || `Nibble scanned ${sourceCount} recipes and cross-referenced the ingredients against your dietary profile. ${restrictedCount} out of ${totalCount} common ingredients were flagged.`}
           </p>
         </div>
       </div>
 
-      {/* REFERENCES (collapsible, in white card) */}
+      {/* REFERENCES (collapsible, in white card) — with favicons */}
       <div className="mb-8">
         <div className="bg-warm-white rounded-3xl border border-border shadow-soft overflow-hidden">
           <button
             onClick={() => setShowSources(!showSources)}
             className="flex items-center justify-between w-full text-left px-5 py-4 min-h-[48px]"
           >
-            <h2 className="font-mono text-xs lowercase text-indigo">
-              references ({result.sources.length} sources)
-            </h2>
+            <div className="flex items-center gap-2">
+              {/* Show stacked favicons */}
+              <div className="flex -space-x-1">
+                {result.sources.slice(0, 4).map((source, i) => {
+                  const favicon = getFaviconUrl(source.url)
+                  return favicon ? (
+                    <img
+                      key={i}
+                      src={favicon}
+                      alt=""
+                      className="w-5 h-5 rounded-full border border-warm-white"
+                      onError={(e) => { e.target.style.display = 'none' }}
+                    />
+                  ) : null
+                })}
+              </div>
+              <h2 className="font-mono text-xs lowercase text-indigo">
+                {sourceCount} sources
+              </h2>
+            </div>
             {showSources
               ? <ChevronUp className="w-4 h-4 text-text-secondary" />
               : <ChevronDown className="w-4 h-4 text-text-secondary" />
@@ -211,23 +241,35 @@ export default function ResultsPage() {
           </button>
           {showSources && (
             <div className="px-4 pb-4 space-y-2 animate-fade-up" style={{ animationDuration: '0.3s' }}>
-              {result.sources.map((source, i) => (
-                <a
-                  key={i}
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[44px] hover:bg-cream-dark transition-colors group"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-indigo flex-shrink-0" />
-                  <span className="text-sm text-indigo group-hover:underline flex-1">
-                    {source.name}
-                  </span>
-                  <span className="text-[10px] text-text-secondary font-mono">
-                    {source.url !== '#' ? new URL(source.url).hostname : ''}
-                  </span>
-                </a>
-              ))}
+              {result.sources.map((source, i) => {
+                const favicon = getFaviconUrl(source.url)
+                const hostname = (() => {
+                  try { return new URL(source.url).hostname.replace('www.', '') } catch { return source.site || '' }
+                })()
+
+                return (
+                  <a
+                    key={i}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-2xl px-4 py-3 min-h-[48px] bg-cream border border-border hover:border-indigo transition-colors group"
+                  >
+                    {favicon && (
+                      <img
+                        src={favicon}
+                        alt=""
+                        className="w-5 h-5 rounded flex-shrink-0"
+                        onError={(e) => { e.target.style.display = 'none' }}
+                      />
+                    )}
+                    <span className="text-sm text-indigo group-hover:underline flex-1 truncate">
+                      {hostname}
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 text-text-secondary flex-shrink-0" />
+                  </a>
+                )
+              })}
             </div>
           )}
         </div>
@@ -236,7 +278,7 @@ export default function ResultsPage() {
       {/* Disclaimer */}
       <div className="bg-warm-white rounded-2xl p-4 flex gap-3 border border-border shadow-soft mb-6">
         <Info className="w-4 h-4 text-indigo flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-text-secondary leading-relaxed">
+        <p className="text-[13px] text-text-secondary leading-relaxed">
           Results are based on common recipes and may vary by restaurant.
           This is not medical advice — when in doubt, ask the kitchen.
         </p>
@@ -270,7 +312,7 @@ function IngredientRow({ ingredient }) {
           {name}
         </span>
         {restricted && (
-          <span className="text-[10px] font-mono lowercase text-danger bg-blush-light rounded-full px-2 py-0.5 border border-blush">
+          <span className="text-[13px] font-mono lowercase text-danger bg-blush-light rounded-full px-2 py-0.5 border border-blush">
             no-go
           </span>
         )}

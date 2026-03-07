@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import ProfileBadge from '../components/ProfileBadge'
+import FavouritesCarousel from '../components/FavouritesCarousel'
 import RecentSearches from '../components/RecentSearches'
 import OnigiriIcon from '../components/OnigiriIcon'
 
@@ -52,11 +53,14 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Favourites carousel */}
+      <FavouritesCarousel />
+
       {/* Recent searches */}
       <RecentSearches />
 
       {/* Disclaimer */}
-      <p className="mt-10 text-[11px] text-text-secondary text-center leading-relaxed px-4">
+      <p className="mt-10 text-[13px] text-text-secondary text-center leading-relaxed px-4">
         nibble uses AI to identify common ingredients. Results may vary by restaurant.
         Not medical advice — when in doubt, ask the kitchen.
       </p>

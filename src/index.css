@@ -4,15 +4,15 @@
 
 @theme {
   /* Nibble — One Year inspired palette */
-  /* Backgrounds: offwhite / light grey */
-  --color-cream: #E8E6E3;
-  --color-cream-dark: #DDDBD7;
-  --color-warm-white: #F0EEEB;
+  /* Backgrounds */
+  --color-cream: #F1F1EF;
+  --color-cream-dark: #E5E5E3;
+  --color-warm-white: #FFFFFF;
 
-  /* Accent — deep indigo (like One Year's blue) */
-  --color-indigo: #2B2BB0;
-  --color-indigo-light: #DDDCF5;
-  --color-indigo-muted: #8888C8;
+  /* Accent — vibrant indigo */
+  --color-indigo: #452AE1;
+  --color-indigo-light: #E8E4FB;
+  --color-indigo-muted: #9B8CE8;
 
   /* Pastels — muted, grey-tinted */
   --color-lilac: #C8C5D8;
@@ -25,7 +25,7 @@
   --color-blush-light: #EDE2E2;
 
   /* Bold accents */
-  --color-cobalt: #2B2BB0;
+  --color-cobalt: #452AE1;
   --color-terracotta: #A0522D;
   --color-forest: #2D6A4F;
 
@@ -40,9 +40,9 @@
   --color-text-muted: #5C5856;
   --color-border: #D5D2CE;
 
-  /* Fonts */
+  /* Fonts — DM Mono as primary */
   --font-mono: 'DM Mono', 'Courier New', monospace;
-  --font-sans: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'DM Mono', 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 @layer base {
@@ -55,6 +55,7 @@
     margin: 0;
     min-height: 100vh;
     min-width: 320px;
+    font-size: 14px;
   }
 
   #root {

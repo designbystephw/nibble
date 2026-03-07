@@ -4,7 +4,7 @@ import { useProfile } from '../context/ProfileContext'
 import { ArrowLeft, Mail, User, LogOut, Lock } from 'lucide-react'
 import OnigiriIcon from '../components/OnigiriIcon'
 
-export default function AccountPage() {
+export default function AccountPage({ embedded = false }) {
   const navigate = useNavigate()
   const { account, authLoading, signUp, signIn, signInWithGoogle, signOut } = useProfile()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
@@ -137,13 +137,13 @@ export default function AccountPage() {
               </p>
             </div>
           </div>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-[13px] text-text-muted">
             Joined {new Date(account.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
           </p>
         </div>
 
         <div className="bg-warm-white rounded-2xl p-4 border border-border shadow-soft mb-6">
-          <p className="text-[11px] text-text-secondary leading-relaxed">
+          <p className="text-[13px] text-text-secondary leading-relaxed">
             Your diet preferences, custom diets, and search history are saved to your account and sync across all your devices.
           </p>
         </div>
@@ -162,15 +162,18 @@ export default function AccountPage() {
   // Auth form view
   return (
     <div className="pt-6 pb-8">
-      <div className="flex items-center justify-between mb-8">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-mono lowercase">back</span>
-        </button>
-      </div>
+      {!embedded && (
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-mono lowercase">back</span>
+          </button>
+        </div>
+      )}
+      {embedded && <div className="mb-8" />}
 
       {/* Logo + title */}
       <div className="flex flex-col items-center mb-8">

@@ -199,6 +199,15 @@ export const knownIngredients = [
   'five spice', 'curry powder', 'garam masala',
   'white pepper', 'szechuan pepper',
   'fresh ginger', 'ginger',
+  // TCM herbs & medicinal ingredients
+  'chrysanthemum', 'hawthorn', 'goji berries', 'wolfberry',
+  'astragalus', 'dong quai', 'angelica root', 'licorice root',
+  'lotus seed', 'lotus root', 'red dates', 'jujube',
+  'coix seed', "job's tears", 'barley (chinese)',
+  'rehmannia', 'schisandra', 'eucommia',
+  'dried longan', 'snow fungus', 'white fungus',
+  'solomon seal', 'dendrobium', 'american ginseng', 'ginseng',
+  'dang shen', 'huang qi', 'red sage',
   // Drinks
   'tea', 'black tea', 'green tea', 'matcha',
   'energy drinks', 'sports drinks', 'kombucha',

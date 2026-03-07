@@ -26,7 +26,7 @@ export default function ProfileBadge() {
       >
         {account ? (
           <div className="w-6 h-6 rounded-full bg-indigo-light flex items-center justify-center">
-            <span className="text-[10px] font-mono font-medium text-indigo">
+            <span className="text-[13px] font-mono font-medium text-indigo">
               {account.name.charAt(0).toUpperCase()}
             </span>
           </div>
