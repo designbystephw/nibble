@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { ArrowLeft, Mail, User, LogOut } from 'lucide-react'
+import { ArrowLeft, Mail, User, LogOut, Lock } from 'lucide-react'
 import OnigiriIcon from '../components/OnigiriIcon'
 
 export default function AccountPage() {
   const navigate = useNavigate()
-  const { account, signUp, signOut } = useProfile()
+  const { account, authLoading, signUp, signIn, signInWithGoogle, signOut } = useProfile()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
-  function handleEmailAuth(e) {
+  async function handleEmailAuth(e) {
     e.preventDefault()
     setError('')
     const trimmedEmail = email.trim()
@@ -20,24 +23,81 @@ export default function AccountPage() {
       setError('Please enter a valid email address')
       return
     }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
 
-    if (mode === 'signup') {
-      if (!name.trim()) {
-        setError('Please enter your name')
-        return
+    setLoading(true)
+    try {
+      if (mode === 'signup') {
+        if (!name.trim()) {
+          setError('Please enter your name')
+          setLoading(false)
+          return
+        }
+        await signUp(trimmedEmail, password, name.trim())
+        setConfirmationSent(true)
+      } else {
+        await signIn(trimmedEmail, password)
       }
-      signUp(trimmedEmail, name.trim())
-    } else {
-      // Sign in — create account if doesn't exist (simple localStorage auth)
-      signUp(trimmedEmail, name.trim() || trimmedEmail.split('@')[0])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
-  function handleGoogleSSO() {
-    // Simulate Google SSO — in production, this would use Firebase Auth or similar
-    const mockEmail = 'user@gmail.com'
-    const mockName = 'Google User'
-    signUp(mockEmail, mockName)
+  async function handleGoogleSSO() {
+    setError('')
+    try {
+      await signInWithGoogle()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="pt-6 pb-8 flex items-center justify-center min-h-[60vh]">
+        <p className="text-sm text-text-secondary font-mono lowercase">loading...</p>
+      </div>
+    )
+  }
+
+  // Confirmation sent view
+  if (confirmationSent) {
+    return (
+      <div className="pt-6 pb-8">
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-mono lowercase">back</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-indigo-light flex items-center justify-center mb-4">
+            <Mail className="w-8 h-8 text-indigo" />
+          </div>
+          <h1 className="font-mono text-xl lowercase text-text-primary mb-2">
+            check your email
+          </h1>
+          <p className="text-sm text-text-secondary mb-6">
+            We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+          </p>
+          <button
+            onClick={() => { setConfirmationSent(false); setMode('signin') }}
+            className="text-sm text-indigo hover:underline font-mono lowercase"
+          >
+            back to sign in
+          </button>
+        </div>
+      </div>
+    )
   }
 
   // Signed in view
@@ -59,7 +119,7 @@ export default function AccountPage() {
             your account
           </h1>
           <p className="text-sm text-text-secondary">
-            Your settings are saved to this device
+            Your data syncs automatically across devices
           </p>
         </div>
 
@@ -84,15 +144,12 @@ export default function AccountPage() {
 
         <div className="bg-warm-white rounded-2xl p-4 border border-border shadow-soft mb-6">
           <p className="text-[11px] text-text-secondary leading-relaxed">
-            Your diet preferences, custom diets, and search history are automatically saved to this device.
-            Sign in on another device to sync your data.
+            Your diet preferences, custom diets, and search history are saved to your account and sync across all your devices.
           </p>
         </div>
 
         <button
-          onClick={() => {
-            signOut()
-          }}
+          onClick={() => signOut()}
           className="w-full flex items-center justify-center gap-2 bg-warm-white border border-border rounded-2xl py-3.5 min-h-[48px] text-sm font-mono lowercase text-danger hover:bg-blush-light transition-all shadow-soft"
         >
           <LogOut className="w-4 h-4" />
@@ -125,7 +182,7 @@ export default function AccountPage() {
         </h1>
         <p className="text-sm text-text-secondary text-center">
           {mode === 'signup'
-            ? 'Save your diet settings across sessions'
+            ? 'Save your diet settings across devices'
             : 'Sign in to access your saved settings'}
         </p>
       </div>
@@ -177,15 +234,27 @@ export default function AccountPage() {
           />
         </div>
 
+        <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-3 shadow-soft focus-within:border-indigo transition-all">
+          <Lock className="w-4 h-4 text-indigo flex-shrink-0" />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="password"
+            className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
+          />
+        </div>
+
         {error && (
           <p className="text-xs text-danger px-1">{error}</p>
         )}
 
         <button
           type="submit"
-          className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity"
+          disabled={loading}
+          className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          {mode === 'signup' ? 'create account' : 'sign in'}
+          {loading ? 'please wait...' : mode === 'signup' ? 'create account' : 'sign in'}
         </button>
       </form>
 
