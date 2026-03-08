@@ -2,29 +2,15 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { dietPresets, knownIngredients } from '../data/dietPresets'
-import { ArrowLeft, X, Plus, ChevronRight, Pencil, Check, Sparkles } from 'lucide-react'
-
-// Find similar presets based on avoid-list overlap
-function findSimilarPresets(avoidList) {
-  if (avoidList.length === 0) return []
-  const listSet = new Set(avoidList.map(i => i.toLowerCase()))
-  return dietPresets
-    .map(preset => {
-      const presetSet = new Set(preset.avoidList.map(i => i.toLowerCase()))
-      const overlap = [...listSet].filter(i => presetSet.has(i)).length
-      const score = overlap / Math.max(listSet.size, presetSet.size)
-      return { ...preset, score, overlap }
-    })
-    .filter(p => p.score > 0.1)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-}
+import { ArrowLeft, X, Plus, Pencil, Check, Sparkles, RotateCcw } from 'lucide-react'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
   const {
     activeProfile, updateProfile,
     customDiets, addCustomDiet, updateCustomDiet, removeCustomDiet,
+    savePresetCustomisation, resetPresetCustomisation,
+    getPresetCustomisation, isPresetCustomised,
   } = useProfile()
   const [customInput, setCustomInput] = useState('')
   const [showIngredientSuggestions, setShowIngredientSuggestions] = useState(false)
@@ -32,35 +18,47 @@ export default function ProfilePage() {
   const ingredientWrapperRef = useRef(null)
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [newDietName, setNewDietName] = useState('')
-  const [editingName, setEditingName] = useState(null) // id of diet being renamed
+  const [editingName, setEditingName] = useState(null)
   const [editNameValue, setEditNameValue] = useState('')
   const [startFromPreset, setStartFromPreset] = useState(null)
+  const [showBottomSheet, setShowBottomSheet] = useState(false)
+  const bottomSheetRef = useRef(null)
 
   const allDiets = [...dietPresets, ...customDiets]
   const isCustom = customDiets.some(d => d.id === activeProfile.presetId)
+  const currentPreset = allDiets.find(p => p.id === activeProfile.presetId)
 
+  // Open bottom sheet when a diet is selected
   function handlePresetChange(presetId) {
     const preset = allDiets.find(p => p.id === presetId)
-    if (preset) {
-      updateProfile(activeProfile.id, {
-        presetId: preset.id,
-        name: preset.name,
-        color: preset.color,
-        avoidList: preset.avoidList,
-      })
-    }
+    if (!preset) return
+
+    // For built-in presets, use customisation if available
+    const isBuiltIn = dietPresets.some(p => p.id === presetId)
+    const customAvoidList = isBuiltIn ? getPresetCustomisation(presetId) : null
+
+    updateProfile(activeProfile.id, {
+      presetId: preset.id,
+      name: preset.name,
+      color: preset.color,
+      avoidList: customAvoidList || preset.avoidList,
+    })
+    setShowBottomSheet(true)
   }
 
   function removeIngredient(ingredient) {
     const newList = activeProfile.avoidList.filter(i => i !== ingredient)
     updateProfile(activeProfile.id, { avoidList: newList })
-    // Sync back to custom diet object if editing a custom diet
+    // Persist customisation
+    const isBuiltIn = dietPresets.some(p => p.id === activeProfile.presetId)
+    if (isBuiltIn) {
+      savePresetCustomisation(activeProfile.presetId, newList)
+    }
     if (isCustom) {
       updateCustomDiet(activeProfile.presetId, { avoidList: newList })
     }
   }
 
-  // Filter known ingredients based on input, excluding already-added ones
   const ingredientSuggestions = customInput.trim().length > 0
     ? knownIngredients
         .filter(i =>
@@ -72,12 +70,15 @@ export default function ProfilePage() {
 
   function addIngredient(ingredient) {
     const item = (ingredient || '').trim().toLowerCase()
-    // Only allow known ingredients
     if (!item || !knownIngredients.includes(item)) return
     if (activeProfile.avoidList.map(a => a.toLowerCase()).includes(item)) return
     const newList = [...activeProfile.avoidList, item]
     updateProfile(activeProfile.id, { avoidList: newList })
-    // Sync back to custom diet object if editing a custom diet
+    // Persist customisation
+    const isBuiltIn = dietPresets.some(p => p.id === activeProfile.presetId)
+    if (isBuiltIn) {
+      savePresetCustomisation(activeProfile.presetId, newList)
+    }
     if (isCustom) {
       updateCustomDiet(activeProfile.presetId, { avoidList: newList })
     }
@@ -104,7 +105,6 @@ export default function ProfilePage() {
       } else if (ingredientSuggestions.length === 1) {
         addIngredient(ingredientSuggestions[0])
       } else if (ingredientSuggestions.length === 0 && customInput.trim()) {
-        // Exact match check for direct typing
         addIngredient(customInput)
       }
     } else if (e.key === 'Escape') {
@@ -112,7 +112,6 @@ export default function ProfilePage() {
     }
   }
 
-  // Close suggestions on outside click
   useEffect(() => {
     function handleClickOutside(e) {
       if (ingredientWrapperRef.current && !ingredientWrapperRef.current.contains(e.target)) {
@@ -139,8 +138,6 @@ export default function ProfilePage() {
       isCustom: true,
     }
     addCustomDiet(newDiet)
-    // Directly update profile with the new diet's data instead of going through
-    // handlePresetChange, which can't find the diet in stale state
     updateProfile(activeProfile.id, {
       presetId: newDiet.id,
       name: newDiet.name,
@@ -150,6 +147,7 @@ export default function ProfilePage() {
     setShowAddCustom(false)
     setNewDietName('')
     setStartFromPreset(null)
+    setShowBottomSheet(true)
   }
 
   function handleRename(dietId) {
@@ -163,14 +161,25 @@ export default function ProfilePage() {
     setEditNameValue('')
   }
 
-  // Suggestions based on current custom diet name
-  const similarPresets = showAddCustom && newDietName.trim().length > 0
-    ? findSimilarPresets(
-        dietPresets.flatMap(p =>
-          p.name.toLowerCase().includes(newDietName.toLowerCase()) ? p.avoidList : []
-        )
-      )
-    : []
+  function handleResetPreset() {
+    const original = dietPresets.find(p => p.id === activeProfile.presetId)
+    if (!original) return
+    resetPresetCustomisation(activeProfile.presetId)
+    updateProfile(activeProfile.id, { avoidList: original.avoidList })
+  }
+
+  // Sort presets so active one is first
+  const sortedPresets = [...dietPresets].sort((a, b) => {
+    if (a.id === activeProfile.presetId) return -1
+    if (b.id === activeProfile.presetId) return 1
+    return 0
+  })
+
+  const sortedCustomDiets = [...customDiets].sort((a, b) => {
+    if (a.id === activeProfile.presetId) return -1
+    if (b.id === activeProfile.presetId) return 1
+    return 0
+  })
 
   return (
     <div className="pt-6 pb-8">
@@ -191,83 +200,86 @@ export default function ProfilePage() {
           my diet
         </h1>
         <p className="text-sm text-text-secondary">
-          Choose a preset and customise your avoid list
+          Select or create a diet and customise your avoid list
         </p>
       </div>
 
-      {/* Active profile indicator */}
-      <div className="bg-warm-white rounded-2xl p-4 mb-8 shadow-soft border border-border flex items-center gap-3">
-        <div
-          className="w-4 h-4 rounded-full flex-shrink-0"
-          style={{ backgroundColor: activeProfile.color }}
-        />
-        <div className="flex-1">
-          <p className="font-mono text-sm lowercase text-text-primary font-medium">
-            {activeProfile.name}
-          </p>
-          <p className="text-xs text-text-secondary">
-            {activeProfile.avoidList.length} items on your avoid list
-          </p>
-        </div>
-      </div>
-
-      {/* Diet presets */}
+      {/* Diet presets — horizontal carousel */}
       <div className="mb-8">
         <h3 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
           diet presets
         </h3>
-        <div className="space-y-2">
-          {dietPresets.map((preset) => {
+        <div
+          className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {sortedPresets.map((preset) => {
             const isActive = preset.id === activeProfile.presetId
+            const customised = isPresetCustomised(preset.id)
             return (
               <button
                 key={preset.id}
                 onClick={() => handlePresetChange(preset.id)}
-                className={`w-full flex items-center gap-3 rounded-2xl px-4 py-3.5 min-h-[48px] border transition-all text-left ${
+                className={`flex-shrink-0 w-[120px] h-[120px] rounded-2xl p-3 border transition-all text-left flex flex-col justify-between ${
                   isActive
                     ? 'bg-indigo-light border-indigo shadow-soft'
                     : 'bg-warm-white border-border shadow-soft hover:border-indigo'
                 }`}
               >
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: preset.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${isActive ? 'text-indigo' : 'text-text-primary'}`}>
+                <div>
+                  <div
+                    className="w-3 h-3 rounded-full mb-2"
+                    style={{ backgroundColor: preset.color }}
+                  />
+                  <p className={`text-xs font-medium leading-tight line-clamp-2 ${isActive ? 'text-indigo' : 'text-text-primary'}`}>
                     {preset.name}
                   </p>
-                  <p className="text-xs text-text-secondary truncate">
-                    {preset.description}
-                  </p>
                 </div>
-                {isActive && (
-                  <div className="w-2 h-2 rounded-full bg-indigo flex-shrink-0" />
-                )}
-                {!isActive && (
-                  <ChevronRight className="w-4 h-4 text-text-secondary flex-shrink-0" />
-                )}
+                <div className="flex items-center gap-1">
+                  {customised && (
+                    <span className="text-[10px] font-mono lowercase bg-indigo/10 text-indigo rounded-full px-1.5 py-0.5">
+                      customised
+                    </span>
+                  )}
+                  {isActive && !customised && (
+                    <div className="w-2 h-2 rounded-full bg-indigo" />
+                  )}
+                </div>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Custom diets */}
+      {/* Custom diets — horizontal carousel with add button next to heading */}
       <div className="mb-8">
-        <h3 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
-          custom diets
-        </h3>
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h3 className="font-mono text-xs lowercase text-indigo">
+            custom diets
+          </h3>
+          {!showAddCustom && (
+            <button
+              onClick={() => setShowAddCustom(true)}
+              className="flex items-center gap-1 text-indigo font-mono text-xs lowercase hover:opacity-70 transition-opacity min-h-[36px]"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              add
+            </button>
+          )}
+        </div>
 
         {customDiets.length > 0 && (
-          <div className="space-y-2 mb-3">
-            {customDiets.map((diet) => {
+          <div
+            className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {sortedCustomDiets.map((diet) => {
               const isActive = diet.id === activeProfile.presetId
               const isEditing = editingName === diet.id
               return (
                 <div
                   key={diet.id}
-                  className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 min-h-[48px] border transition-all ${
+                  className={`flex-shrink-0 w-[120px] h-[120px] rounded-2xl p-3 border transition-all text-left flex flex-col justify-between relative ${
                     isActive
                       ? 'bg-indigo-light border-indigo shadow-soft'
                       : 'bg-warm-white border-border shadow-soft hover:border-indigo'
@@ -275,70 +287,65 @@ export default function ProfilePage() {
                 >
                   <button
                     onClick={() => handlePresetChange(diet.id)}
-                    className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                    className="flex flex-col flex-1 min-w-0 text-left"
                   >
                     <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      className="w-3 h-3 rounded-full mb-2 flex-shrink-0"
                       style={{ backgroundColor: diet.color }}
                     />
-                    <div className="flex-1 min-w-0">
-                      {isEditing ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={editNameValue}
-                            onChange={(e) => setEditNameValue(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleRename(diet.id)}
-                            className="text-sm font-medium bg-transparent outline-none border-b border-indigo text-text-primary w-full"
-                            autoFocus
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      ) : (
-                        <>
-                          <p className={`text-sm font-medium ${isActive ? 'text-indigo' : 'text-text-primary'}`}>
-                            {diet.name}
-                          </p>
-                          <p className="text-xs text-text-secondary truncate">
-                            {diet.avoidList.length} items
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </button>
-
-                  <div className="flex items-center gap-1 flex-shrink-0">
                     {isEditing ? (
-                      <button
-                        onClick={() => handleRename(diet.id)}
-                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-dark transition-colors"
-                      >
-                        <Check className="w-4 h-4 text-indigo" />
-                      </button>
+                      <input
+                        type="text"
+                        value={editNameValue}
+                        onChange={(e) => setEditNameValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRename(diet.id)}
+                        className="text-xs font-medium bg-transparent outline-none border-b border-indigo text-text-primary w-full"
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     ) : (
+                      <p className={`text-xs font-medium leading-tight line-clamp-2 ${isActive ? 'text-indigo' : 'text-text-primary'}`}>
+                        {diet.name}
+                      </p>
+                    )}
+                  </button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-text-secondary font-mono">
+                      {diet.avoidList.length} items
+                    </span>
+                    <div className="flex items-center gap-0.5">
+                      {isEditing ? (
+                        <button
+                          onClick={() => handleRename(diet.id)}
+                          className="p-1 rounded-full hover:bg-cream-dark transition-colors"
+                        >
+                          <Check className="w-3 h-3 text-indigo" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingName(diet.id)
+                            setEditNameValue(diet.name)
+                          }}
+                          className="p-1 rounded-full hover:bg-cream-dark transition-colors"
+                        >
+                          <Pencil className="w-3 h-3 text-text-secondary" />
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          setEditingName(diet.id)
-                          setEditNameValue(diet.name)
+                          removeCustomDiet(diet.id)
+                          if (activeProfile.presetId === diet.id) {
+                            handlePresetChange('tcm-damp-heat')
+                          }
                         }}
-                        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-cream-dark transition-colors"
+                        className="p-1 rounded-full hover:bg-blush-light transition-colors"
                       >
-                        <Pencil className="w-3.5 h-3.5 text-text-secondary" />
+                        <X className="w-3 h-3 text-text-secondary hover:text-danger" />
                       </button>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeCustomDiet(diet.id)
-                        if (activeProfile.presetId === diet.id) {
-                          handlePresetChange('tcm-damp-heat')
-                        }
-                      }}
-                      className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-blush-light transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5 text-text-secondary hover:text-danger" />
-                    </button>
+                    </div>
                   </div>
                 </div>
               )
@@ -346,8 +353,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Add custom diet button / form */}
-        {!showAddCustom ? (
+        {customDiets.length === 0 && !showAddCustom && (
           <button
             onClick={() => setShowAddCustom(true)}
             className="w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 min-h-[48px] border border-dashed border-indigo-muted bg-warm-white text-indigo font-mono text-sm lowercase shadow-soft hover:bg-indigo-light transition-all"
@@ -355,8 +361,11 @@ export default function ProfilePage() {
             <Plus className="w-4 h-4" />
             add custom diet
           </button>
-        ) : (
-          <div className="bg-warm-white rounded-2xl p-5 border border-border shadow-soft space-y-4">
+        )}
+
+        {/* Add custom diet form */}
+        {showAddCustom && (
+          <div className="bg-warm-white rounded-2xl p-5 border border-border shadow-soft space-y-4 mt-3">
             <div>
               <label className="text-xs font-mono lowercase text-indigo mb-2 block">
                 diet name
@@ -371,7 +380,6 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Similar diet suggestions */}
             {dietPresets.length > 0 && (
               <div>
                 <p className="text-xs font-mono lowercase text-text-secondary mb-2 flex items-center gap-1.5">
@@ -395,7 +403,7 @@ export default function ProfilePage() {
                 </div>
                 {startFromPreset && (
                   <p className="text-[13px] text-text-secondary mt-2">
-                    Similar to {dietPresets.find(p => p.id === startFromPreset)?.name}? We'll copy its avoid list so you don't start from scratch.
+                    We'll copy its avoid list so you don't start from scratch.
                   </p>
                 )}
               </div>
@@ -420,86 +428,158 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Avoid list */}
-      <div className="mb-6">
-        <h3 className="font-mono text-xs lowercase text-indigo mb-3 px-1">
-          your avoid list
-        </h3>
+      {/* Avoid list bottom sheet trigger */}
+      {currentPreset && !showBottomSheet && (
+        <button
+          onClick={() => setShowBottomSheet(true)}
+          className="w-full bg-warm-white rounded-2xl p-4 mb-6 shadow-soft border border-border flex items-center gap-3 text-left hover:border-indigo transition-all"
+        >
+          <div
+            className="w-4 h-4 rounded-full flex-shrink-0"
+            style={{ backgroundColor: activeProfile.color }}
+          />
+          <div className="flex-1">
+            <p className="font-mono text-sm lowercase text-text-primary font-medium">
+              {activeProfile.name}
+            </p>
+            <p className="text-xs text-text-secondary">
+              {activeProfile.avoidList.length} items on your avoid list — tap to edit
+            </p>
+          </div>
+        </button>
+      )}
 
-        {/* Add ingredient with autocomplete */}
-        <div ref={ingredientWrapperRef} className="relative mb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-2 shadow-soft focus-within:border-indigo transition-all">
-              <Plus className="w-4 h-4 text-indigo flex-shrink-0" />
-              <input
-                type="text"
-                value={customInput}
-                onChange={(e) => {
-                  setCustomInput(e.target.value)
-                  setShowIngredientSuggestions(true)
-                  setSelectedSuggestionIndex(-1)
-                }}
-                onFocus={() => setShowIngredientSuggestions(true)}
-                onKeyDown={handleIngredientKeyDown}
-                placeholder="search for an ingredient..."
-                className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
-              />
-            </div>
-            <button
-              onClick={() => {
-                if (ingredientSuggestions.length === 1) addIngredient(ingredientSuggestions[0])
-                else if (selectedSuggestionIndex >= 0) addIngredient(ingredientSuggestions[selectedSuggestionIndex])
-                else addIngredient(customInput)
-              }}
-              disabled={!customInput.trim() || !knownIngredients.includes(customInput.trim().toLowerCase())}
-              className="bg-indigo text-white font-mono text-xs lowercase rounded-2xl px-4 py-3 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-40"
-            >
-              add
-            </button>
+      {/* Bottom sheet overlay */}
+      {showBottomSheet && (
+        <div
+          className="fixed inset-0 bg-black/30 z-40 transition-opacity"
+          onClick={() => setShowBottomSheet(false)}
+        />
+      )}
+
+      {/* Bottom sheet */}
+      {showBottomSheet && (
+        <div
+          ref={bottomSheetRef}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-cream rounded-t-3xl shadow-soft-lg border-t border-border max-h-[80vh] flex flex-col animate-fade-up"
+        >
+          {/* Sheet handle */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 rounded-full bg-border" />
           </div>
 
-          {/* Suggestions dropdown */}
-          {showIngredientSuggestions && customInput.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-12 mt-2 bg-warm-white rounded-2xl shadow-soft-lg border border-border overflow-hidden z-10 max-h-[240px] overflow-y-auto">
-              {ingredientSuggestions.length > 0 ? (
-                ingredientSuggestions.map((item, i) => (
-                  <button
-                    key={item}
-                    onClick={() => addIngredient(item)}
-                    className={`w-full text-left px-4 py-3 min-h-[44px] text-sm font-mono lowercase text-text-primary transition-colors border-b border-border last:border-b-0 ${
-                      i === selectedSuggestionIndex ? 'bg-indigo-light' : 'hover:bg-indigo-light'
-                    }`}
-                  >
-                    {item}
-                  </button>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-sm text-text-secondary font-mono lowercase">
-                  no matching ingredient found
+          {/* Sheet header */}
+          <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: activeProfile.color }}
+              />
+              <h3 className="font-mono text-sm lowercase text-text-primary font-medium">
+                {activeProfile.name}
+              </h3>
+              {!isCustom && isPresetCustomised(activeProfile.presetId) && (
+                <span className="text-[10px] font-mono lowercase bg-indigo/10 text-indigo rounded-full px-1.5 py-0.5">
+                  customised
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {!isCustom && isPresetCustomised(activeProfile.presetId) && (
+                <button
+                  onClick={handleResetPreset}
+                  className="flex items-center gap-1 text-xs font-mono lowercase text-text-secondary hover:text-indigo transition-colors min-h-[36px] px-2"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  reset
+                </button>
+              )}
+              <button
+                onClick={() => setShowBottomSheet(false)}
+                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full hover:bg-cream-dark transition-colors"
+              >
+                <X className="w-4 h-4 text-text-secondary" />
+              </button>
+            </div>
+          </div>
+
+          {/* Sheet content — scrollable */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            {/* Add ingredient with autocomplete */}
+            <div ref={ingredientWrapperRef} className="relative mb-4">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-2 shadow-soft focus-within:border-indigo transition-all">
+                  <Plus className="w-4 h-4 text-indigo flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={customInput}
+                    onChange={(e) => {
+                      setCustomInput(e.target.value)
+                      setShowIngredientSuggestions(true)
+                      setSelectedSuggestionIndex(-1)
+                    }}
+                    onFocus={() => setShowIngredientSuggestions(true)}
+                    onKeyDown={handleIngredientKeyDown}
+                    placeholder="search for an ingredient..."
+                    className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (ingredientSuggestions.length === 1) addIngredient(ingredientSuggestions[0])
+                    else if (selectedSuggestionIndex >= 0) addIngredient(ingredientSuggestions[selectedSuggestionIndex])
+                    else addIngredient(customInput)
+                  }}
+                  disabled={!customInput.trim() || !knownIngredients.includes(customInput.trim().toLowerCase())}
+                  className="bg-indigo text-white font-mono text-xs lowercase rounded-2xl px-4 py-3 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-40"
+                >
+                  add
+                </button>
+              </div>
+
+              {showIngredientSuggestions && customInput.trim().length > 0 && (
+                <div className="absolute top-full left-0 right-12 mt-2 bg-warm-white rounded-2xl shadow-soft-lg border border-border overflow-hidden z-10 max-h-[240px] overflow-y-auto">
+                  {ingredientSuggestions.length > 0 ? (
+                    ingredientSuggestions.map((item, i) => (
+                      <button
+                        key={item}
+                        onClick={() => addIngredient(item)}
+                        className={`w-full text-left px-4 py-3 min-h-[44px] text-sm font-mono lowercase text-text-primary transition-colors border-b border-border last:border-b-0 ${
+                          i === selectedSuggestionIndex ? 'bg-indigo-light' : 'hover:bg-indigo-light'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-text-secondary font-mono lowercase">
+                      no matching ingredient found
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Ingredient pills */}
-        <div className="flex flex-wrap gap-2">
-          {activeProfile.avoidList.map((ingredient) => (
-            <span
-              key={ingredient}
-              className="inline-flex items-center gap-1.5 bg-warm-white border border-border rounded-full pl-3 pr-1.5 py-1.5 text-xs font-mono lowercase text-text-primary shadow-soft group"
-            >
-              {ingredient}
-              <button
-                onClick={() => removeIngredient(ingredient)}
-                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-blush-light hover:text-danger transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          ))}
+            {/* Ingredient pills */}
+            <div className="flex flex-wrap gap-2">
+              {activeProfile.avoidList.map((ingredient) => (
+                <span
+                  key={ingredient}
+                  className="inline-flex items-center gap-1.5 bg-warm-white border border-border rounded-full pl-3 pr-1.5 py-1.5 text-xs font-mono lowercase text-text-primary shadow-soft group"
+                >
+                  {ingredient}
+                  <button
+                    onClick={() => removeIngredient(ingredient)}
+                    className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-blush-light hover:text-danger transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Info note */}
       <div className="bg-warm-white rounded-2xl p-4 border border-border shadow-soft">
