@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   searchHistory: 'nibble_searchHistory',
   favourites: 'nibble_favourites',
   customDiets: 'nibble_customDiets',
+  presetCustomisations: 'nibble_presetCustomisations',
 };
 
 function loadFromStorage(key, fallback) {
@@ -51,6 +52,10 @@ export function ProfileProvider({ children }) {
   );
   const [customDiets, setCustomDiets] = useState(() =>
     loadFromStorage(STORAGE_KEYS.customDiets, [])
+  );
+  // Per-preset avoid list overrides: { [presetId]: string[] }
+  const [presetCustomisations, setPresetCustomisations] = useState(() =>
+    loadFromStorage(STORAGE_KEYS.presetCustomisations, {})
   );
 
   // Supabase auth state
@@ -178,6 +183,7 @@ export function ProfileProvider({ children }) {
   useEffect(() => { saveToStorage(STORAGE_KEYS.searchHistory, searchHistory) }, [searchHistory]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.favourites, favourites) }, [favourites]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.customDiets, customDiets) }, [customDiets]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.presetCustomisations, presetCustomisations) }, [presetCustomisations]);
 
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
 
@@ -279,6 +285,26 @@ export function ProfileProvider({ children }) {
     });
   }, [user]);
 
+  const savePresetCustomisation = useCallback((presetId, avoidList) => {
+    setPresetCustomisations(prev => ({ ...prev, [presetId]: avoidList }));
+  }, []);
+
+  const resetPresetCustomisation = useCallback((presetId) => {
+    setPresetCustomisations(prev => {
+      const next = { ...prev };
+      delete next[presetId];
+      return next;
+    });
+  }, []);
+
+  const getPresetCustomisation = useCallback((presetId) => {
+    return presetCustomisations[presetId] || null;
+  }, [presetCustomisations]);
+
+  const isPresetCustomised = useCallback((presetId) => {
+    return presetId in presetCustomisations;
+  }, [presetCustomisations]);
+
   const removeCustomDiet = useCallback((id) => {
     setCustomDiets(prev => prev.filter(d => d.id !== id));
     if (user) {
@@ -342,6 +368,11 @@ export function ProfileProvider({ children }) {
       addCustomDiet,
       updateCustomDiet,
       removeCustomDiet,
+      presetCustomisations,
+      savePresetCustomisation,
+      resetPresetCustomisation,
+      getPresetCustomisation,
+      isPresetCustomised,
       account,
       user,
       authLoading,

@@ -168,6 +168,7 @@ export const knownIngredients = [
   'oats', 'corn', 'cornstarch', 'rice', 'brown rice', 'quinoa',
   'buckwheat', 'millet', 'sorghum', 'tapioca', 'potato starch',
   'noodles', 'rice noodles', 'glass noodles', 'udon',
+  'multigrain bread', 'wholemeal bread',
   // Vegetables
   'broccoli', 'cabbage', 'kale', 'spinach', 'bok choy',
   'capsicum', 'bell pepper', 'eggplant', 'zucchini', 'carrot',

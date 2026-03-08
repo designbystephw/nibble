@@ -18,8 +18,9 @@ export default function FavouritesCarousel() {
 
   function handleScroll() {
     if (!scrollRef.current) return
-    const { scrollLeft, clientWidth } = scrollRef.current
-    const index = Math.round(scrollLeft / (clientWidth * 0.75))
+    const { scrollLeft } = scrollRef.current
+    // Each tile is 120px + 12px gap
+    const index = Math.round(scrollLeft / 132)
     setActiveDot(Math.min(index, favouriteDishes.length - 1))
   }
 
@@ -51,9 +52,9 @@ export default function FavouritesCarousel() {
               <button
                 key={result.dish}
                 onClick={() => navigate('/results', { state: { result } })}
-                className="flex-shrink-0 w-[75%] snap-start bg-cream rounded-2xl p-4 border border-border text-left hover:border-indigo transition-all"
+                className="flex-shrink-0 w-[120px] h-[120px] snap-start bg-cream rounded-2xl p-3 border border-border text-left hover:border-indigo transition-all flex flex-col justify-between"
               >
-                <p className="text-sm font-medium text-text-primary truncate mb-1">{result.dish}</p>
+                <p className="text-xs font-medium text-text-primary line-clamp-2 leading-tight mb-1">{result.dish}</p>
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${dotColor}`} />
                   <span className="text-xs font-mono lowercase text-text-secondary">{label}</span>
