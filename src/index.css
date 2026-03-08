@@ -1,48 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap');
+
+@font-face {
+  font-family: 'Monotalic';
+  src: url('/fonts/Monotalic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monotalic';
+  src: url('/fonts/Monotalic-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monotalic';
+  src: url('/fonts/Monotalic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monotalic';
+  src: url('/fonts/Monotalic-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
 
 @import "tailwindcss";
 
 @theme {
-  /* Nibble — One Year inspired palette */
-  /* Backgrounds */
+  /* ── Backgrounds ── */
   --color-cream: #F1F1EF;
-  --color-cream-dark: #E5E5E3;
+  --color-cream-dark: #E8E6E3;
   --color-warm-white: #FFFFFF;
 
-  /* Accent — vibrant indigo */
+  /* ── Brand palette (from user) ── */
+  --color-brown: #6F5D4A;
+  --color-yellow: #FCD98D;
+  --color-purple: #D9CCFC;
+  --color-olive: #81A790;
+  --color-green: #ACF7AA;
+  --color-salmon: #FFCFAF;
+  --color-pink: #FCAFFF;
+
+  /* ── Extended from vibe ── */
+  --color-green-dark: #5B9A5B;
+  --color-green-light: #D8F5D6;
+  --color-purple-dark: #7B6BC4;
+  --color-yellow-dark: #C4A03A;
+  --color-salmon-dark: #D48B5C;
+  --color-pink-dark: #C87BCB;
+  --color-brown-light: #B8A694;
+
+  /* ── Legacy accent (kept for compatibility) ── */
   --color-indigo: #452AE1;
   --color-indigo-light: #E8E4FB;
   --color-indigo-muted: #9B8CE8;
 
-  /* Pastels — muted, grey-tinted */
-  --color-lilac: #C8C5D8;
-  --color-lilac-light: #E8E6F2;
-  --color-sage: #B5C4B4;
-  --color-sage-light: #D8E2D7;
-  --color-peach: #DCCABC;
-  --color-peach-light: #EDE4DB;
-  --color-blush: #D8BCBC;
-  --color-blush-light: #EDE2E2;
+  /* ── Traffic lights ── */
+  --color-safe: #ACF7AA;
+  --color-safe-dark: #5B9A5B;
+  --color-caution: #FCD98D;
+  --color-caution-dark: #C4A03A;
+  --color-danger: #E85454;
+  --color-danger-light: #FFCFCF;
 
-  /* Bold accents */
-  --color-cobalt: #452AE1;
-  --color-terracotta: #A0522D;
-  --color-forest: #2D6A4F;
-
-  /* Traffic lights */
-  --color-safe: #5B9A5B;
-  --color-caution: #C4A03A;
-  --color-danger: #B85454;
-
-  /* Neutrals — WCAG AA compliant on cream/warm-white */
+  /* ── Neutrals ── */
   --color-text-primary: #2A2A2A;
-  --color-text-secondary: #4A4845;
-  --color-text-muted: #5C5856;
-  --color-border: #D5D2CE;
+  --color-text-secondary: #6F6F6F;
+  --color-text-muted: #9A9A9A;
+  --color-border: #E8E6E3;
 
-  /* Fonts — DM Mono as primary */
-  --font-mono: 'DM Mono', 'Courier New', monospace;
-  --font-sans: 'DM Mono', 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* ── Fonts ── */
+  --font-heading: 'Monotalic', 'Space Mono', 'DM Mono', monospace;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', 'DM Mono', monospace;
 }
 
 @layer base {
@@ -55,60 +93,83 @@
     margin: 0;
     min-height: 100vh;
     min-width: 320px;
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 1.5;
   }
 
   #root {
     min-height: 100vh;
   }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.2;
+  }
 }
 
-/* Dot grid background — like grid paper */
-.dot-grid {
-  background-image: radial-gradient(circle, var(--color-indigo-muted) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Soft shadows — more blur, less opacity */
+/* ── Soft shadows ── */
 .shadow-soft {
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px -2px rgba(0, 0, 0, 0.06);
 }
 
 .shadow-soft-lg {
-  box-shadow: 0 8px 40px -4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.08);
 }
 
-/* Animations */
+/* ── Gradient card backgrounds ── */
+.gradient-green {
+  background: linear-gradient(135deg, var(--color-green) 0%, var(--color-warm-white) 100%);
+}
+.gradient-purple {
+  background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-warm-white) 100%);
+}
+.gradient-yellow {
+  background: linear-gradient(135deg, var(--color-yellow) 0%, var(--color-warm-white) 100%);
+}
+.gradient-salmon {
+  background: linear-gradient(135deg, var(--color-salmon) 0%, var(--color-warm-white) 100%);
+}
+.gradient-pink {
+  background: linear-gradient(135deg, var(--color-pink) 0%, var(--color-warm-white) 100%);
+}
+.gradient-olive {
+  background: linear-gradient(135deg, rgba(129,167,144,0.4) 0%, var(--color-warm-white) 100%);
+}
+.gradient-brown {
+  background: linear-gradient(135deg, rgba(111,93,74,0.2) 0%, var(--color-warm-white) 100%);
+}
+
+/* ── Bottom gradient overlay ── */
+.gradient-bottom {
+  background: linear-gradient(180deg, transparent 0%, var(--color-pink) 40%, var(--color-purple) 100%);
+  opacity: 0.15;
+}
+
+/* ── Animations ── */
 @keyframes gentle-pulse {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
 
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes grow-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes leaf-sway {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes scroll-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
 }
 
 .animate-gentle-pulse {
@@ -123,11 +184,19 @@
   animation: grow-in 0.4s ease-out forwards;
 }
 
-.animate-leaf-sway {
-  animation: leaf-sway 3s ease-in-out infinite;
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
 }
 
-/* Stroke colours for SVG confidence ring */
-.stroke-safe { stroke: var(--color-safe); }
-.stroke-caution { stroke: var(--color-caution); }
+.animate-scroll-right {
+  animation: scroll-right 30s linear infinite;
+}
+
+/* ── Stroke colours for SVG confidence ring ── */
+.stroke-safe { stroke: var(--color-safe-dark); }
+.stroke-caution { stroke: var(--color-caution-dark); }
 .stroke-danger { stroke: var(--color-danger); }
+
+/* ── Scrollbar hiding for carousels ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

@@ -24,27 +24,24 @@ function AuthGate({ children }) {
       return () => clearTimeout(timer)
     }
     if (!authLoading && !user) {
-      // Reset so transition shows again on next login
       setReady(false)
       setShowTransition(false)
     }
   }, [authLoading, user, ready])
 
-  // Still loading auth state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-cream dot-grid flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-indigo-light flex items-center justify-center mb-4">
-            <OnigiriIcon className="w-8 h-8 text-indigo animate-gentle-pulse" />
+          <div className="w-16 h-16 rounded-full bg-purple/30 flex items-center justify-center mb-4">
+            <OnigiriIcon className="w-8 h-8 text-text-primary animate-gentle-pulse" />
           </div>
-          <p className="font-mono text-sm lowercase text-text-secondary">loading...</p>
+          <p className="text-sm text-text-secondary">loading...</p>
         </div>
       </div>
     )
   }
 
-  // Not logged in — show auth page
   if (!user) {
     return (
       <Layout>
@@ -53,15 +50,14 @@ function AuthGate({ children }) {
     )
   }
 
-  // Just logged in — show authorising transition
   if (showTransition) {
     return (
-      <div className="min-h-screen bg-cream dot-grid flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="flex flex-col items-center animate-fade-up">
-          <div className="w-16 h-16 rounded-full bg-indigo-light flex items-center justify-center mb-4">
-            <OnigiriIcon className="w-8 h-8 text-indigo animate-gentle-pulse" />
+          <div className="w-16 h-16 rounded-full bg-purple/30 flex items-center justify-center mb-4">
+            <OnigiriIcon className="w-8 h-8 text-text-primary animate-gentle-pulse" />
           </div>
-          <p className="font-mono text-sm lowercase text-indigo">authorising...</p>
+          <p className="text-sm text-text-primary">authorising...</p>
         </div>
       </div>
     )

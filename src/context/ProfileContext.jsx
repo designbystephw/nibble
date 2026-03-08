@@ -28,12 +28,14 @@ function saveToStorage(key, value) {
   } catch { /* quota exceeded — silently fail */ }
 }
 
+const defaultPreset = dietPresets.find(p => p.id === 'tcm-damp-heat');
 const DEFAULT_PROFILE = {
   id: 'default',
-  name: 'My Diet',
+  name: defaultPreset.name,
   presetId: 'tcm-damp-heat',
-  color: '#D4A039',
-  avoidList: dietPresets.find(p => p.id === 'tcm-damp-heat').avoidList,
+  color: defaultPreset.color,
+  emoji: defaultPreset.emoji || '💧',
+  avoidList: defaultPreset.avoidList,
   customRestrictions: [],
 };
 

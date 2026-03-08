@@ -7,7 +7,7 @@ import OnigiriIcon from '../components/OnigiriIcon'
 export default function AccountPage({ embedded = false }) {
   const navigate = useNavigate()
   const { account, authLoading, signUp, signIn, signInWithGoogle, signOut } = useProfile()
-  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
+  const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -19,181 +19,135 @@ export default function AccountPage({ embedded = false }) {
     e.preventDefault()
     setError('')
     const trimmedEmail = email.trim()
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setError('Please enter a valid email address')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
+    if (!trimmedEmail || !trimmedEmail.includes('@')) { setError('Please enter a valid email address'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     setLoading(true)
     try {
       if (mode === 'signup') {
-        if (!name.trim()) {
-          setError('Please enter your name')
-          setLoading(false)
-          return
-        }
+        if (!name.trim()) { setError('Please enter your name'); setLoading(false); return }
         await signUp(trimmedEmail, password, name.trim())
         setConfirmationSent(true)
       } else {
         await signIn(trimmedEmail, password)
       }
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err) { setError(err.message) }
+    finally { setLoading(false) }
   }
 
   async function handleGoogleSSO() {
     setError('')
-    try {
-      await signInWithGoogle()
-    } catch (err) {
-      setError(err.message)
-    }
+    try { await signInWithGoogle() } catch (err) { setError(err.message) }
   }
 
   if (authLoading) {
     return (
       <div className="pt-6 pb-8 flex items-center justify-center min-h-[60vh]">
-        <p className="text-sm text-text-secondary font-mono lowercase">loading...</p>
+        <p className="text-sm text-text-secondary">loading...</p>
       </div>
     )
   }
 
-  // Confirmation sent view
   if (confirmationSent) {
     return (
       <div className="pt-6 pb-8">
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-mono lowercase">back</span>
-          </button>
-        </div>
-
-        <div className="flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-full bg-indigo-light flex items-center justify-center mb-4">
-            <Mail className="w-8 h-8 text-indigo" />
+        {!embedded && (
+          <div className="mb-8">
+            <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-text-primary min-h-[44px]">
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm">back</span>
+            </button>
           </div>
-          <h1 className="font-mono text-xl lowercase text-text-primary mb-2">
-            check your email
-          </h1>
+        )}
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-full bg-purple/30 flex items-center justify-center mb-4">
+            <Mail className="w-8 h-8 text-purple-dark" />
+          </div>
+          <h1 className="text-xl text-text-primary mb-2">Check your email</h1>
           <p className="text-sm text-text-secondary mb-6">
             We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
           </p>
-          <button
-            onClick={() => { setConfirmationSent(false); setMode('signin') }}
-            className="text-sm text-indigo hover:underline font-mono lowercase"
-          >
-            back to sign in
+          <button onClick={() => { setConfirmationSent(false); setMode('signin') }} className="text-sm text-purple-dark hover:underline">
+            Back to sign in
           </button>
         </div>
       </div>
     )
   }
 
-  // Signed in view
   if (account) {
     return (
       <div className="pt-6 pb-8">
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
-          >
+        <div className="mb-8">
+          <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-text-primary min-h-[44px]">
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-mono lowercase">back</span>
+            <span className="text-sm">back</span>
           </button>
         </div>
 
         <div className="mb-8">
-          <h1 className="font-mono text-xl lowercase text-text-primary mb-1">
-            your account
-          </h1>
-          <p className="text-sm text-text-secondary">
-            Your data syncs automatically across devices
-          </p>
+          <h1 className="text-[30px] leading-tight text-text-primary mb-1">Your Account</h1>
+          <p className="text-sm text-text-secondary">Your data syncs automatically across devices</p>
         </div>
 
         <div className="bg-warm-white rounded-2xl p-5 border border-border shadow-soft mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-indigo-light flex items-center justify-center">
-              <User className="w-6 h-6 text-indigo" />
+            <div className="w-12 h-12 rounded-full bg-purple/30 flex items-center justify-center">
+              <User className="w-6 h-6 text-purple-dark" />
             </div>
             <div>
-              <p className="font-mono text-sm font-medium text-text-primary">
-                {account.name}
-              </p>
-              <p className="text-xs text-text-secondary">
-                {account.email}
-              </p>
+              <p className="text-sm font-medium text-text-primary">{account.name}</p>
+              <p className="text-xs text-text-secondary">{account.email}</p>
             </div>
           </div>
-          <p className="text-[13px] text-text-muted">
+          <p className="text-xs text-text-muted">
             Joined {new Date(account.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
           </p>
         </div>
 
         <div className="bg-warm-white rounded-2xl p-4 border border-border shadow-soft mb-6">
-          <p className="text-[13px] text-text-secondary leading-relaxed">
+          <p className="text-sm text-text-secondary leading-relaxed">
             Your diet preferences, custom diets, and search history are saved to your account and sync across all your devices.
           </p>
         </div>
 
         <button
           onClick={() => signOut()}
-          className="w-full flex items-center justify-center gap-2 bg-warm-white border border-border rounded-2xl py-3.5 min-h-[48px] text-sm font-mono lowercase text-danger hover:bg-blush-light transition-all shadow-soft"
+          className="w-full flex items-center justify-center gap-2 bg-warm-white border border-border rounded-2xl py-3.5 text-sm text-danger hover:bg-danger-light transition-all shadow-soft"
         >
           <LogOut className="w-4 h-4" />
-          sign out
+          Sign out
         </button>
       </div>
     )
   }
 
-  // Auth form view
   return (
     <div className="pt-6 pb-8">
       {!embedded && (
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 text-text-primary hover:text-indigo transition-colors min-h-[44px] min-w-[44px]"
-          >
+        <div className="mb-8">
+          <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-text-primary min-h-[44px]">
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-mono lowercase">back</span>
+            <span className="text-sm">back</span>
           </button>
         </div>
       )}
       {embedded && <div className="mb-8" />}
 
-      {/* Logo + title */}
       <div className="flex flex-col items-center mb-8">
-        <div className="w-16 h-16 rounded-full bg-indigo-light flex items-center justify-center mb-4">
-          <OnigiriIcon className="w-8 h-8 text-indigo" />
+        <div className="w-16 h-16 rounded-full bg-purple/30 flex items-center justify-center mb-4">
+          <OnigiriIcon className="w-8 h-8 text-text-primary" />
         </div>
-        <h1 className="font-mono text-xl lowercase text-text-primary mb-1">
-          {mode === 'signup' ? 'create account' : 'welcome back'}
+        <h1 className="text-xl text-text-primary mb-1">
+          {mode === 'signup' ? 'Create account' : 'Welcome back'}
         </h1>
         <p className="text-sm text-text-secondary text-center">
-          {mode === 'signup'
-            ? 'Save your diet settings across devices'
-            : 'Sign in to access your saved settings'}
+          {mode === 'signup' ? 'Save your diet settings across devices' : 'Sign in to access your saved settings'}
         </p>
       </div>
 
-      {/* Google SSO button */}
       <button
         onClick={handleGoogleSSO}
-        className="w-full flex items-center justify-center gap-3 bg-warm-white border border-border rounded-2xl py-3.5 min-h-[48px] text-sm font-medium text-text-primary hover:border-indigo transition-all shadow-soft mb-4"
+        className="w-full flex items-center justify-center gap-3 bg-warm-white border border-border rounded-2xl py-3.5 text-sm font-medium text-text-primary hover:border-text-muted transition-all shadow-soft mb-4"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -204,85 +158,46 @@ export default function AccountPage({ embedded = false }) {
         Continue with Google
       </button>
 
-      {/* Divider */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-xs text-text-muted font-mono lowercase">or</span>
+        <span className="text-xs text-text-muted">or</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      {/* Email form */}
       <form onSubmit={handleEmailAuth} className="space-y-3">
         {mode === 'signup' && (
-          <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-3 shadow-soft focus-within:border-indigo transition-all">
-            <User className="w-4 h-4 text-indigo flex-shrink-0" />
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="your name"
-              className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
-            />
+          <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 gap-3 shadow-soft focus-within:border-text-muted">
+            <User className="w-4 h-4 text-text-muted flex-shrink-0" />
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name"
+              className="flex-1 bg-transparent outline-none text-sm text-text-primary placeholder:text-text-muted" />
           </div>
         )}
 
-        <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-3 shadow-soft focus-within:border-indigo transition-all">
-          <Mail className="w-4 h-4 text-indigo flex-shrink-0" />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email address"
-            className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
-          />
+        <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 gap-3 shadow-soft focus-within:border-text-muted">
+          <Mail className="w-4 h-4 text-text-muted flex-shrink-0" />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address"
+            className="flex-1 bg-transparent outline-none text-sm text-text-primary placeholder:text-text-muted" />
         </div>
 
-        <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 min-h-[48px] gap-3 shadow-soft focus-within:border-indigo transition-all">
-          <Lock className="w-4 h-4 text-indigo flex-shrink-0" />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="password"
-            className="flex-1 bg-transparent outline-none text-sm font-mono lowercase text-text-primary placeholder:text-text-muted"
-          />
+        <div className="flex items-center bg-warm-white rounded-2xl border border-border px-4 py-3 gap-3 shadow-soft focus-within:border-text-muted">
+          <Lock className="w-4 h-4 text-text-muted flex-shrink-0" />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"
+            className="flex-1 bg-transparent outline-none text-sm text-text-primary placeholder:text-text-muted" />
         </div>
 
-        {error && (
-          <p className="text-xs text-danger px-1">{error}</p>
-        )}
+        {error && <p className="text-xs text-danger px-1">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo text-white font-mono text-sm lowercase rounded-2xl py-3.5 min-h-[48px] shadow-soft hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          {loading ? 'please wait...' : mode === 'signup' ? 'create account' : 'sign in'}
+        <button type="submit" disabled={loading}
+          className="w-full bg-text-primary text-warm-white text-sm font-medium rounded-2xl py-3.5 shadow-soft hover:opacity-90 transition-opacity disabled:opacity-50">
+          {loading ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Sign in'}
         </button>
       </form>
 
-      {/* Toggle mode */}
       <p className="text-center text-xs text-text-secondary mt-6">
         {mode === 'signup' ? (
-          <>
-            Already have an account?{' '}
-            <button
-              onClick={() => { setMode('signin'); setError('') }}
-              className="text-indigo hover:underline font-medium"
-            >
-              Sign in
-            </button>
-          </>
+          <>Already have an account?{' '}<button onClick={() => { setMode('signin'); setError('') }} className="text-text-primary font-medium hover:underline">Sign in</button></>
         ) : (
-          <>
-            Don't have an account?{' '}
-            <button
-              onClick={() => { setMode('signup'); setError('') }}
-              className="text-indigo hover:underline font-medium"
-            >
-              Create one
-            </button>
-          </>
+          <>Don't have an account?{' '}<button onClick={() => { setMode('signup'); setError('') }} className="text-text-primary font-medium hover:underline">Create one</button></>
         )}
       </p>
     </div>
