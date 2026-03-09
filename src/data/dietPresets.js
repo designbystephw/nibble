@@ -2,8 +2,11 @@ export const dietPresets = [
   {
     id: 'tcm-damp-heat',
     name: 'TCM Damp-Heat',
-    description: 'For damp-heat conditions in Traditional Chinese Medicine',
-    color: '#D4A039',
+    description: 'This diet focuses on clearing dampness and heat through specific food choices.',
+    color: '#D9CCFC',
+    emoji: '💧',
+    gradient: 'gradient-purple',
+    iconFile: 'curve-7949468',
     avoidList: [
       'alcohol', 'beer', 'wine', 'spirits',
       'deep-fried foods', 'greasy foods',
@@ -30,8 +33,11 @@ export const dietPresets = [
   {
     id: 'tcm-cold-deficiency',
     name: 'TCM Cold Deficiency',
-    description: 'For cold/yang deficiency conditions in TCM',
-    color: '#3D5A99',
+    description: 'This diet warms the body and dispels cold with nourishing foods and gentle spices.',
+    color: '#FCD98D',
+    emoji: '🔥',
+    gradient: 'gradient-yellow',
+    iconFile: 'abstract-7949479',
     avoidList: [
       'cold/raw foods', 'salads', 'sashimi', 'raw vegetables',
       'ice cream', 'iced drinks', 'cold water',
@@ -52,8 +58,11 @@ export const dietPresets = [
   {
     id: 'gerd',
     name: 'GERD / Acid Reflux',
-    description: 'For managing gastroesophageal reflux disease',
-    color: '#C4652E',
+    description: 'Managing acid reflux by avoiding trigger foods that relax the esophageal sphincter.',
+    color: '#FFCFAF',
+    emoji: '🫙',
+    gradient: 'gradient-salmon',
+    iconFile: 'circle-7949534',
     avoidList: [
       'tomato', 'tomato sauce', 'ketchup',
       'citrus', 'orange', 'lemon', 'lime', 'grapefruit',
@@ -71,9 +80,12 @@ export const dietPresets = [
   },
   {
     id: 'eczema',
-    name: 'Eczema Diet',
-    description: 'Common trigger foods for eczema flare-ups',
-    color: '#C65D5D',
+    name: 'Eczema',
+    description: 'Avoiding common trigger foods that can cause eczema flare-ups.',
+    color: '#FCAFFF',
+    emoji: '🟥',
+    gradient: 'gradient-pink',
+    iconFile: 'square-7949487',
     avoidList: [
       'dairy', 'milk', 'cheese', 'cream', 'butter', 'yoghurt',
       'eggs',
@@ -93,8 +105,11 @@ export const dietPresets = [
   {
     id: 'gestational-diabetes',
     name: 'Gestational Diabetes',
-    description: 'Managing blood sugar during pregnancy',
-    color: '#5B9A5B',
+    description: 'Managing blood sugar during pregnancy by limiting high-GI foods.',
+    color: '#ACF7AA',
+    emoji: '🤰',
+    gradient: 'gradient-green',
+    iconFile: 'flower-7949467',
     avoidList: [
       'sugar', 'refined sugar', 'candy', 'sweets',
       'white bread', 'white rice', 'white pasta',
@@ -113,8 +128,11 @@ export const dietPresets = [
   {
     id: 'low-fodmap',
     name: 'Low FODMAP',
-    description: 'For IBS and digestive sensitivities',
-    color: '#B8CEB7',
+    description: 'Reducing fermentable carbs that trigger IBS and digestive discomfort.',
+    color: '#81A790',
+    emoji: '🌿',
+    gradient: 'gradient-olive',
+    iconFile: 'curve-7949473',
     avoidList: [
       'garlic', 'onion', 'shallots', 'leek',
       'wheat', 'rye', 'barley',
@@ -131,8 +149,11 @@ export const dietPresets = [
   {
     id: 'anti-inflammatory',
     name: 'Anti-Inflammatory',
-    description: 'Reducing chronic inflammation through diet',
-    color: '#2D6A4F',
+    description: 'Cutting inflammatory triggers like processed foods, sugar, and refined oils.',
+    color: '#6F5D4A',
+    emoji: '🛡️',
+    gradient: 'gradient-brown',
+    iconFile: 'star-7949514',
     avoidList: [
       'refined sugar', 'high-fructose corn syrup',
       'trans fats', 'partially hydrogenated oils', 'margarine',
@@ -217,6 +238,31 @@ export const knownIngredients = [
   'gelatin', 'agar', 'carrageenan',
   'lecithin', 'food starch', 'maltodextrin', 'dextrose',
 ].map(i => i.toLowerCase()).filter((v, i, a) => a.indexOf(v) === i).sort()
+
+// Dish emoji map for scrolling suggestion rows
+export const dishEmojis = {
+  'Bibimbap': '🍲', 'Lanzhou Beef Noodles': '🍜', 'Malatang': '🌶️',
+  'Spaghetti Carbonara': '🍝', 'Cheeseburger': '🍔', 'Quesadilla': '🫔',
+  'Sushi Roll': '🍣', 'Dumplings': '🥟', 'Hot Dog': '🌭',
+  'Caesar Salad': '🥗', 'Margherita Pizza': '🍕', 'Pho': '🍜',
+  'Ice Cream': '🍦', 'Shrimp Tacos': '🍤', 'Pad Thai': '🍜',
+  'Butter Chicken': '🍛', 'Fish and Chips': '🐟', 'Roti Canai': '🫓',
+  'Laksa': '🍜', 'Tom Yum Soup': '🍲', 'Char Kway Teow': '🍳',
+  'Nasi Lemak': '🍚', 'Beef Rendang': '🥘', 'Hainanese Chicken Rice': '🍗',
+  'Satay': '🍢', 'Wonton Noodles': '🥟', 'Bak Kut Teh': '🍖',
+  'Mee Goreng': '🍜', 'Congee': '🥣', 'Fried Rice': '🍚',
+  'Sushi': '🍣', 'Ramen': '🍜', 'Carbonara': '🍝',
+  'Croissant': '🥐', 'Pancakes': '🥞', 'Burrito': '🌯',
+  'Tacos': '🌮', 'Steak': '🥩', 'Salmon': '🍣',
+  'Curry': '🍛', 'Fried Chicken': '🍗', 'Poke Bowl': '🥗',
+}
+
+// Dishes for scrolling rows (3 rows of ~8 dishes each)
+export const scrollingDishes = [
+  ['Bibimbap', 'Lanzhou Beef Noodles', 'Malatang', 'Spaghetti Carbonara', 'Cheeseburger', 'Quesadilla', 'Ramen', 'Croissant'],
+  ['Sushi Roll', 'Dumplings', 'Hot Dog', 'Caesar Salad', 'Poke Bowl', 'Fried Chicken', 'Burrito', 'Curry'],
+  ['Margherita Pizza', 'Pho', 'Ice Cream', 'Shrimp Tacos', 'Pad Thai', 'Butter Chicken', 'Steak', 'Pancakes'],
+]
 
 export const popularDishes = [
   'Char Kway Teow',

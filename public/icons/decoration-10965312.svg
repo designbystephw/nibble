@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" viewBox="0 0 150 150">
+  <defs>
+    <clipPath id="clippath">
+      <rect width="53.53" height="53.17" x="21.47" y="18.92" style="fill:none;stroke-width:0"/>
+    </clipPath>
+    <clipPath id="clippath-1">
+      <rect width="53.53" height="53.17" x="75" y="18.92" style="fill:none;stroke-width:0"/>
+    </clipPath>
+    <clipPath id="clippath-2">
+      <rect width="53.53" height="53.17" x="75" y="72.09" style="fill:none;stroke-width:0"/>
+    </clipPath>
+    <clipPath id="clippath-3">
+      <rect width="53.53" height="53.17" x="21.47" y="72.09" style="fill:none;stroke-width:0"/>
+    </clipPath>
+  </defs>
+  <g>
+    <g id="_Mirror_Repeat_">
+      <g style="clip-path:url(#clippath)">
+        <path d="M21.47,18.92h21.44c17.72,0,32.1,14.39,32.1,32.1v21.06h-21.44c-17.72,0-32.1-14.39-32.1-32.1v-21.06h0Z" style="stroke-width:0;fill:#b59ac7"/>
+      </g>
+    </g>
+    <g id="_Mirror_Repeat_-2">
+      <g style="clip-path:url(#clippath-1)">
+        <path d="M107.08,18.92h21.44v21.06c0,17.72-14.39,32.1-32.1,32.1h-21.44v-21.06c0-17.72,14.39-32.1,32.1-32.1Z" style="stroke-width:0;fill:#b59ac7" transform="rotate(180 101.755 45.505)"/>
+      </g>
+    </g>
+  </g>
+  <g>
+    <g id="_Mirror_Repeat_-3">
+      <g style="clip-path:url(#clippath-2)">
+        <path d="M74.98,72.09h21.44c17.72,0,32.1,14.39,32.1,32.1v21.06h-21.44c-17.72,0-32.1-14.39-32.1-32.1v-21.06h0Z" style="stroke-width:0;fill:#b59ac7" transform="rotate(-180 101.755 98.675)"/>
+      </g>
+    </g>
+    <g id="_Mirror_Repeat_-4">
+      <g style="clip-path:url(#clippath-3)">
+        <path d="M53.58,72.09h21.44v21.06c0,17.72-14.39,32.1-32.1,32.1h-21.44v-21.06c0-17.72,14.39-32.1,32.1-32.1Z" style="stroke-width:0;fill:#b59ac7"/>
+      </g>
+    </g>
+  </g>
+</svg>
